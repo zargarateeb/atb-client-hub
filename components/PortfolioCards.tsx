@@ -16,36 +16,36 @@ interface FloatCard {
 }
 
 const CARDS: FloatCard[] = [
-  // Top-left — podcast/audio work
   {
     title: "PODCAST EDIT",
-    image: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80",
-    rotation: -11,
-    position: { top: "16%", left: "3%" },
+    image:
+      "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&q=80",
+    rotation: -14,
+    position: { top: "16%", left: "1%" },
     delay: 0.1,
   },
-  // Top-right — motion graphics
   {
     title: "MOTION GRAPHICS",
-    image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
-    rotation: 10,
-    position: { top: "14%", right: "3%" },
+    image:
+      "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80",
+    rotation: 13,
+    position: { top: "18%", right: "1%" },
     delay: 0.2,
   },
-  // Bottom-left — editing timeline
-  {
-    title: "SHORT FORM",
-    image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80",
-    rotation: -8,
-    position: { bottom: "14%", left: "4%" },
-    delay: 0.3,
-  },
-  // Bottom-right — color grading / studio
   {
     title: "BRAND EDITS",
-    image: "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=600&q=80",
+    rotation: -8,
+    position: { top: "44%", left: "1%" },
+    delay: 0.3,
+  },
+  {
+    title: "SHORT FORM",
+    image:
+      "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&q=80",
     rotation: 9,
-    position: { bottom: "12%", right: "4%" },
+    position: { top: "46%", right: "1%" },
     delay: 0.4,
   },
 ];
@@ -56,8 +56,8 @@ export default function PortfolioCards() {
       {CARDS.map((card, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, y: 40, rotate: 0 }}
-          animate={{ opacity: 1, y: 0, rotate: card.rotation }}
+          initial={{ opacity: 0, y: 30, rotate: 0 }}
+          animate={{ opacity: 0.95, y: 0, rotate: card.rotation }}
           transition={{
             duration: 1.2,
             delay: card.delay,
@@ -69,24 +69,23 @@ export default function PortfolioCards() {
             bottom: card.position.bottom,
             left: card.position.left,
             right: card.position.right,
-            width: "clamp(180px, 14vw, 220px)",
+            width: "clamp(110px, 28vw, 160px)",
           }}
-          className="hidden xl:block"
         >
           <motion.div
-            animate={{ y: [0, -10, 0] }}
+            animate={{ y: [0, -8, 0] }}
             transition={{
-              duration: 7,
+              duration: 6,
               repeat: Infinity,
               ease: "easeInOut",
               delay: card.delay,
             }}
-            className="rounded-2xl overflow-hidden"
+            className="rounded-xl overflow-hidden"
             style={{
               background: "#11131A",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.1)",
               boxShadow:
-                "0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset",
+                "0 20px 40px rgba(0,0,0,0.7), 0 0 40px rgba(139, 92, 246, 0.15)",
             }}
           >
             <div
@@ -96,31 +95,28 @@ export default function PortfolioCards() {
               <img
                 src={card.image}
                 alt={card.title}
-                className="w-full h-full object-cover opacity-90"
+                className="w-full h-full object-cover"
               />
               <div
                 className="absolute inset-0"
                 style={{
                   background:
-                    "linear-gradient(180deg, rgba(8,9,13,0) 30%, rgba(8,9,13,0.85) 100%)",
+                    "linear-gradient(180deg, rgba(8,9,13,0.1) 0%, rgba(8,9,13,0.5) 60%, rgba(8,9,13,0.9) 100%)",
                 }}
               />
-            </div>
-
-            <div className="px-4 py-3 flex items-center justify-between">
-              <p
-                className="text-[10px] font-bold tracking-widest uppercase truncate"
-                style={{ color: "#A0A3B1", letterSpacing: "0.12em" }}
-              >
-                {card.title}
-              </p>
-              <div
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0 ml-2"
-                style={{
-                  background: "#8B5CF6",
-                  boxShadow: "0 0 10px rgba(139,92,246,0.7)",
-                }}
-              />
+              {/* Title inside image bottom-left */}
+              <div className="absolute bottom-1.5 left-2 right-2">
+                <p
+                  className="text-[8px] font-bold uppercase truncate"
+                  style={{
+                    color: "rgba(255,255,255,0.95)",
+                    letterSpacing: "0.08em",
+                    textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+                  }}
+                >
+                  {card.title}
+                </p>
+              </div>
             </div>
           </motion.div>
         </motion.div>

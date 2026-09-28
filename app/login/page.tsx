@@ -5,7 +5,6 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import PortfolioCards from "@/components/PortfolioCards";
-import TrustedBy from "@/components/TrustedBy";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,100 +37,150 @@ export default function LoginPage() {
   return (
     <div
       className="relative min-h-screen overflow-hidden"
-      style={{ background: "#08090D" }}
+      style={{ background: "#05060A" }}
     >
       {/* Ambient purple glows */}
       <div
         className="absolute pointer-events-none"
         style={{
-          top: "-10%",
-          left: "25%",
-          width: "700px",
-          height: "700px",
+          top: "-15%",
+          left: "10%",
+          width: "600px",
+          height: "600px",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 60%)",
+            "radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 60%)",
           filter: "blur(100px)",
         }}
       />
       <div
         className="absolute pointer-events-none"
         style={{
-          bottom: "-15%",
-          right: "15%",
-          width: "600px",
-          height: "600px",
+          top: "30%",
+          right: "-20%",
+          width: "500px",
+          height: "500px",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(109, 40, 217, 0.15) 0%, transparent 60%)",
+            "radial-gradient(circle, rgba(109, 40, 217, 0.2) 0%, transparent 60%)",
           filter: "blur(100px)",
         }}
       />
 
-      {/* Top bar */}
-      <div className="relative z-20 flex items-center justify-between px-6 md:px-10 py-6">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
-              boxShadow:
-                "0 0 24px rgba(139, 92, 246, 0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
-            }}
-          >
-            <img
-              src="https://ik.imagekit.io/5xwchyocd7/potrailt.png"
-              alt="ATB"
-              className="w-full h-full object-contain p-1"
-            />
-          </div>
-          <p
-            className="text-[11px] font-semibold tracking-[0.2em] uppercase hidden sm:block"
-            style={{ color: "#A0A3B1" }}
-          >
-            Client Portal
-          </p>
-        </div>
-        <TrustedBy />
-      </div>
-
-      {/* Floating portfolio cards */}
-      <PortfolioCards />
-
-      {/* Center content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-6 min-h-[calc(100vh-88px)] pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+      {/* ============ TOP: BRANDING ============ */}
+      <div className="relative z-20 pt-8 px-6 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-xl text-center relative z-20"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="font-black leading-none"
+          style={{
+            fontSize: "clamp(2.25rem, 10vw, 3.5rem)",
+            letterSpacing: "-0.03em",
+          }}
         >
-          {/* Brand label */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-[11px] font-semibold uppercase mb-8"
-            style={{ color: "#8B5CF6", letterSpacing: "0.4em" }}
-          >
-            Client Portal
-          </motion.p>
-
-          {/* BIG BRAND */}
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="font-black text-white mb-10"
+          <span
+            className="text-white"
             style={{
-              fontSize: "clamp(3rem, 6vw, 5.5rem)",
-              letterSpacing: "-0.04em",
-              lineHeight: "0.95",
-              textShadow:
-                "0 0 60px rgba(139, 92, 246, 0.3), 0 0 120px rgba(139, 92, 246, 0.15)",
+              textShadow: "0 0 40px rgba(255,255,255,0.15)",
             }}
           >
             ATB{" "}
+          </span>
+          <span
+            style={{
+              background:
+                "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 40%, #7C3AED 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              textShadow: "0 0 60px rgba(139, 92, 246, 0.6)",
+              display: "inline-block",
+            }}
+          >
+            Visuals
+          </span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="text-[11px] md:text-xs font-semibold mt-3"
+          style={{
+            color: "#FFFFFF",
+            letterSpacing: "0.45em",
+            opacity: 0.9,
+          }}
+        >
+          CLIENT PORTAL
+        </motion.p>
+      </div>
+
+      {/* ============ BACKGROUND WATERMARK ============ */}
+      <div
+        className="absolute pointer-events-none select-none z-0"
+        style={{
+          top: "32%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "100%",
+          textAlign: "center",
+          fontSize: "clamp(6rem, 22vw, 14rem)",
+          fontWeight: 900,
+          letterSpacing: "-0.05em",
+          color: "rgba(139, 92, 246, 0.08)",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+        }}
+      >
+        ATB
+      </div>
+      <div
+        className="absolute pointer-events-none select-none z-0"
+        style={{
+          top: "48%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "100%",
+          textAlign: "center",
+          fontSize: "clamp(2rem, 8vw, 5rem)",
+          fontWeight: 700,
+          letterSpacing: "0.3em",
+          color: "rgba(139, 92, 246, 0.06)",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+        }}
+      >
+        VISUALS
+      </div>
+
+      {/* ============ FLOATING PORTFOLIO CARDS ============ */}
+      <PortfolioCards />
+
+      {/* ============ CENTER CONTENT ============ */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-6 min-h-[calc(100vh-140px)] pb-48 pt-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-md text-center"
+        >
+          {/* Headline */}
+          <motion.h2
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.5,
+              duration: 0.8,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="font-black mb-4 leading-tight"
+            style={{
+              fontSize: "clamp(2rem, 8.5vw, 3rem)",
+              letterSpacing: "-0.03em",
+            }}
+          >
             <span
               style={{
                 background:
@@ -139,59 +188,46 @@ export default function LoginPage() {
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                display: "inline-block",
+                textShadow: "0 0 50px rgba(139, 92, 246, 0.4)",
               }}
             >
-              Visuals
+              Welcome{" "}
             </span>
-          </motion.h1>
+            <span className="text-white">Back !</span>
+          </motion.h2>
 
-          {/* Welcome back subtitle */}
+          {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.55, duration: 0.6 }}
-            className="text-xl md:text-2xl font-bold text-white mb-5"
-            style={{ letterSpacing: "-0.02em" }}
+            transition={{ delay: 0.65, duration: 0.6 }}
+            className="text-[13px] md:text-sm leading-relaxed mb-10 mx-auto"
+            style={{ color: "#B8BCC8", maxWidth: "340px" }}
           >
-            Welcome back.
-          </motion.p>
-
-          {/* Description */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="text-sm md:text-[15px] leading-relaxed mb-14"
-            style={{
-              color: "#A0A3B1",
-              maxWidth: "420px",
-              margin: "0 auto",
-            }}
-          >
-            Access your projects, chat with Ateeb, review edits, and stay
-            updated — all in one place.
+            Access your Projects, Chat with ATB, Review Edits and Stay Updated —
+            All in one Place!
           </motion.p>
 
           {/* Form */}
           <motion.form
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.85, duration: 0.6 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
             onSubmit={handleSubmit}
-            className="flex flex-col gap-5 max-w-md mx-auto"
+            className="flex flex-col gap-4 max-w-sm mx-auto"
           >
+            {/* Email input */}
             <div className="relative">
               <div
-                className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ color: "#6B6F80" }}
+                className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: "#8B8FA0" }}
               >
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.8"
-                  className="w-4 h-4"
+                  className="w-5 h-5"
                 >
                   <rect x="2" y="4" width="20" height="16" rx="2" />
                   <path d="M2 7l10 6 10-6" />
@@ -202,31 +238,32 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@yourbrand.com"
-                className="w-full pl-11 pr-4 py-4 rounded-xl text-sm transition-all"
+                placeholder="yourself@email.com"
+                className="w-full pl-14 pr-5 py-4 rounded-full text-sm transition-all"
                 style={{
-                  background: "rgba(17, 19, 26, 0.85)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "rgba(20, 22, 30, 0.75)",
+                  border: "1.5px solid rgba(255, 255, 255, 0.08)",
                   color: "#FFFFFF",
-                  backdropFilter: "blur(10px)",
+                  backdropFilter: "blur(12px)",
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = "rgba(139, 92, 246, 0.5)";
+                  e.target.style.borderColor = "rgba(139, 92, 246, 0.6)";
                   e.target.style.boxShadow =
-                    "0 0 0 3px rgba(139, 92, 246, 0.1)";
-                  e.target.style.background = "rgba(17, 19, 26, 0.95)";
+                    "0 0 0 4px rgba(139, 92, 246, 0.12)";
+                  e.target.style.background = "rgba(20, 22, 30, 0.95)";
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = "rgba(255, 255, 255, 0.08)";
                   e.target.style.boxShadow = "none";
-                  e.target.style.background = "rgba(17, 19, 26, 0.85)";
+                  e.target.style.background = "rgba(20, 22, 30, 0.75)";
                 }}
               />
             </div>
 
+            {/* Error */}
             {error && (
               <div
-                className="text-xs py-3 px-4 rounded-xl text-left"
+                className="text-xs py-2.5 px-4 rounded-full text-center"
                 style={{
                   background: "rgba(239, 68, 68, 0.1)",
                   color: "#FCA5A5",
@@ -237,17 +274,18 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Submit — pill-shaped */}
             <motion.button
               type="submit"
               disabled={loading}
               whileHover={{ scale: loading ? 1 : 1.01 }}
               whileTap={{ scale: loading ? 1 : 0.99 }}
-              className="w-full py-4 rounded-xl text-white font-bold text-sm cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+              className="w-full py-4 rounded-full text-white font-bold text-sm cursor-pointer disabled:opacity-60 disabled:cursor-wait"
               style={{
                 background:
                   "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)",
                 boxShadow:
-                  "0 8px 32px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset, inset 0 1px 0 rgba(255,255,255,0.25)",
+                  "0 12px 32px rgba(139, 92, 246, 0.45), 0 0 0 1px rgba(255,255,255,0.1) inset, inset 0 1px 0 rgba(255,255,255,0.25)",
               }}
             >
               {loading ? "Logging in..." : "Log In →"}
@@ -255,36 +293,62 @@ export default function LoginPage() {
           </motion.form>
 
           {/* Footer note */}
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.1, duration: 0.5 }}
-            className="text-[11px] mt-12"
-            style={{ color: "#4A4D5C" }}
+            transition={{ delay: 1, duration: 0.5 }}
+            className="mt-12"
           >
-            Client access only. Contact Ateeb for an account.
-          </motion.p>
+            <p
+              className="text-[12px] leading-relaxed font-medium"
+              style={{ color: "#B8BCC8" }}
+            >
+              Client Access only.
+            </p>
+            <p
+              className="text-[12px] leading-relaxed font-medium"
+              style={{ color: "#B8BCC8" }}
+            >
+              Contact &quot;ATB Visuals&quot; for an account
+            </p>
+
+            {/* Divider dots */}
+            <div className="flex items-center justify-center gap-3 mt-8">
+              <div
+                className="w-1 h-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.3)" }}
+              />
+              <div
+                className="w-24 h-px"
+                style={{ background: "rgba(255,255,255,0.15)" }}
+              />
+              <div
+                className="w-1 h-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.3)" }}
+              />
+            </div>
+          </motion.div>
         </motion.div>
       </div>
 
-      {/* Big handwritten signature — bottom left */}
+      {/* ============ SIGNATURE — bottom-left ============ */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.3, duration: 1 }}
-        className="absolute hidden lg:block z-20"
+        transition={{ delay: 1.2, duration: 1 }}
+        className="absolute z-20 pointer-events-none"
         style={{
-          left: "56px",
-          bottom: "56px",
+          left: "24px",
+          bottom: "100px",
         }}
       >
         <p
           style={{
             fontFamily: "var(--font-caveat), cursive",
-            color: "rgba(255,255,255,0.9)",
-            textShadow: "0 0 40px rgba(139, 92, 246, 0.5)",
+            color: "rgba(255,255,255,0.92)",
+            textShadow: "0 0 30px rgba(139, 92, 246, 0.6)",
             transform: "rotate(-4deg)",
-            fontSize: "clamp(2rem, 3vw, 2.75rem)",
+            fontSize: "clamp(1.75rem, 6vw, 2.25rem)",
             lineHeight: "0.95",
             fontWeight: 700,
           }}
@@ -299,38 +363,35 @@ export default function LoginPage() {
         </p>
       </motion.div>
 
-      {/* Studio background — bottom */}
+      {/* ============ STUDIO BACKGROUND — bottom ============ */}
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none z-0"
         style={{
           height: "50%",
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80')",
+            "url('https://images.unsplash.com/photo-1626908013351-800ddd734b8a?w=1920&q=80')",
           backgroundSize: "cover",
           backgroundPosition: "center 70%",
-          opacity: 0.28,
+          opacity: 0.55,
           maskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 40%, transparent 100%)",
+            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)",
           WebkitMaskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 40%, transparent 100%)",
+            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)",
         }}
       />
+      {/* Purple ambient overlay */}
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none z-0"
         style={{
           height: "50%",
           background:
-            "linear-gradient(to top, rgba(109, 40, 217, 0.3) 0%, transparent 70%)",
+            "linear-gradient(to top, rgba(109, 40, 217, 0.45) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 100%)",
         }}
       />
-
-      {/* Footer branding — bottom right */}
-      <div
-        className="absolute bottom-6 right-8 text-[10px] hidden md:block z-20"
-        style={{ color: "#4A4D5C", letterSpacing: "0.1em" }}
-      >
-        ATB VISUALS · CLIENT HUB v1
-      </div>
     </div>
   );
 }
