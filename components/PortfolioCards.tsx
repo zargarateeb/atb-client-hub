@@ -57,7 +57,7 @@ export default function PortfolioCards() {
         <motion.div
           key={i}
           initial={{ opacity: 0, y: 30, rotate: 0 }}
-          animate={{ opacity: 0.95, y: 0, rotate: card.rotation }}
+          animate={{ opacity: 1, y: 0, rotate: card.rotation }}
           transition={{
             duration: 1.2,
             delay: card.delay,
@@ -69,7 +69,7 @@ export default function PortfolioCards() {
             bottom: card.position.bottom,
             left: card.position.left,
             right: card.position.right,
-            width: "clamp(110px, 28vw, 160px)",
+            width: "clamp(135px, 34vw, 200px)",
           }}
         >
           <motion.div
@@ -83,9 +83,9 @@ export default function PortfolioCards() {
             className="rounded-xl overflow-hidden"
             style={{
               background: "#11131A",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.16)",
               boxShadow:
-                "0 20px 40px rgba(0,0,0,0.7), 0 0 40px rgba(139, 92, 246, 0.15)",
+                "0 24px 48px rgba(0,0,0,0.75), 0 0 60px rgba(139, 92, 246, 0.35)",
             }}
           >
             <div
