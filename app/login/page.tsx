@@ -363,33 +363,23 @@ export default function LoginPage() {
         </p>
       </motion.div>
 
-      {/* ============ STUDIO BACKGROUND — bottom ============ */}
+      {/* ============ BACKGROUND IMAGE ============ */}
       <div
-        className="absolute inset-x-0 bottom-0 pointer-events-none z-0"
+        className="absolute inset-0 pointer-events-none z-0"
         style={{
-          height: "50%",
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1626908013351-800ddd734b8a?w=1920&q=80')",
+            "url('https://ik.imagekit.io/5xwchyocd7/login-bg.jpg')",
           backgroundSize: "cover",
-          backgroundPosition: "center 70%",
-          opacity: 0.55,
-          maskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)",
+          backgroundPosition: "center",
+          opacity: 0.75,
         }}
       />
-      {/* Purple ambient overlay */}
+      {/* Dark overlay for text readability */}
       <div
-        className="absolute inset-x-0 bottom-0 pointer-events-none z-0"
+        className="absolute inset-0 pointer-events-none z-0"
         style={{
-          height: "50%",
           background:
-            "linear-gradient(to top, rgba(109, 40, 217, 0.45) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 100%)",
-          maskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 100%)",
+            "linear-gradient(180deg, rgba(5, 6, 10, 0.55) 0%, rgba(5, 6, 10, 0.35) 40%, rgba(5, 6, 10, 0.65) 100%)",
         }}
       />
     </div>
