@@ -1,387 +1,467 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import PortfolioCards from "@/components/PortfolioCards";
+
+const BLADES = Array.from({ length: 6 }, (_, i) => i);
+
+const styles = `
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+.atb-login {
+  --bg: #0a0313;
+  --panel: #10061c;
+  --violet: #e19aff;
+  --deep: #3c0a69;
+  --ink: #f6ecfb;
+  --muted: #a48bb8;
+  --line: rgba(225, 154, 255, 0.16);
+  --danger: #ff9bb0;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.atb-login *, .atb-login *::before, .atb-login *::after { box-sizing: border-box; }
+
+.atb-stage {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(28px, 5vw, 72px);
+  background:
+    radial-gradient(70% 60% at 20% 25%, rgba(60, 10, 105, 0.85), transparent 70%),
+    radial-gradient(50% 45% at 85% 85%, rgba(225, 154, 255, 0.14), transparent 70%),
+    var(--bg);
+  border-right: 1px solid var(--line);
+}
+.atb-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(225, 154, 255, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(80% 70% at 40% 50%, #000, transparent);
+  -webkit-mask-image: radial-gradient(80% 70% at 40% 50%, #000, transparent);
+}
+
+.atb-brand {
+  position: absolute;
+  top: clamp(24px, 4vw, 44px);
+  left: clamp(28px, 5vw, 72px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  z-index: 2;
+}
+.atb-mark {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 18px 2px rgba(225, 154, 255, 0.7);
+}
+
+/* --- 3D lens scene --- */
+.atb-scene-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(60vh, 420px);
+  height: min(60vh, 420px);
+  perspective: 1400px;
+}
+.atb-rig {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+.atb-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  transform-style: preserve-3d;
+}
+.atb-orbit.o2 { inset: 10%; transform: translateZ(30px) rotateX(70deg); }
+.atb-orbit.o3 { inset: -6%; transform: translateZ(-20px) rotateY(70deg); border-color: rgba(225, 154, 255, 0.1); }
+
+.atb-lens-ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.35), transparent 40%),
+    conic-gradient(from 210deg, #3c0a69, #6d1fb3, #e19aff, #6d1fb3, #3c0a69);
+  box-shadow: 0 0 60px -10px rgba(225, 154, 255, 0.55), inset 0 0 40px rgba(10, 3, 19, 0.6);
+  transform: translateZ(20px);
+}
+.atb-lens-glass {
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.5), rgba(20, 6, 36, 0.9) 70%);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+  transform: translateZ(46px);
+  overflow: hidden;
+}
+
+.atb-blades {
+  position: absolute;
+  inset: 0;
+  animation: atb-spin 42s linear infinite;
+}
+.atb-blade {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46%;
+  height: 46%;
+  transform-origin: 0% 0%;
+  transform: rotate(calc(60deg * var(--i))) translate(-6%, -6%) rotate(calc(var(--iris, 0) * 50deg));
+  background: linear-gradient(135deg, rgba(225, 154, 255, 0.9), rgba(60, 10, 105, 0.85));
+  clip-path: polygon(0% 0%, 100% 18%, 34% 100%);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  opacity: 0.92;
+}
+
+.atb-lens-core {
+  position: absolute;
+  inset: 40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, var(--violet) 55%, transparent 75%);
+  transform: translateZ(52px);
+  animation: atb-pulse 3.2s ease-in-out infinite;
+}
+.atb-lens-core.active { animation: atb-pulse 0.7s ease-in-out infinite; }
+
+@keyframes atb-spin {
+  from { transform: rotateZ(0deg); }
+  to { transform: rotateZ(360deg); }
+}
+@keyframes atb-pulse {
+  0%, 100% { opacity: 0.55; filter: blur(0.5px); }
+  50% { opacity: 1; filter: blur(0px); }
+}
+
+.atb-chip {
+  position: absolute;
+  width: 15%;
+  aspect-ratio: 1.6;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(225, 154, 255, 0.16), rgba(60, 10, 105, 0.3));
+  backdrop-filter: blur(2px);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.atb-chip-float { animation: atb-float 6s ease-in-out infinite; }
+.atb-chip.c1 { top: 6%; left: -4%; }
+.atb-chip.c2 { bottom: 10%; right: -8%; animation-delay: -2s; }
+.atb-chip.c3 { top: 58%; left: -10%; width: 11%; animation-delay: -4s; }
+
+@keyframes atb-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.atb-caption {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  width: 100%;
+  margin-top: clamp(20px, 4vh, 40px);
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.atb-caption strong { color: var(--ink); font-weight: 500; }
+
+.atb-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(28px, 5vw, 64px);
+  background: var(--panel);
+}
+.atb-form-wrap { width: 100%; max-width: 380px; }
+
+.atb-title {
+  margin: 0 0 12px;
+  font-size: clamp(34px, 4.2vw, 48px);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+.atb-sub { margin: 0 0 36px; color: var(--muted); font-size: 16px; line-height: 1.5; max-width: 34ch; }
+
+.atb-field { display: block; }
+.atb-field > span { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--ink); }
+.atb-input {
+  width: 100%;
+  height: 56px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(225, 154, 255, 0.05);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.atb-input::placeholder { color: rgba(164, 139, 184, 0.6); }
+.atb-input:focus-visible {
+  border-color: var(--violet);
+  background: rgba(225, 154, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(225, 154, 255, 0.16);
+}
+
+.atb-button {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 56px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--violet);
+  color: #250544;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.25s, filter 0.2s;
+  box-shadow: 0 10px 30px -10px rgba(225, 154, 255, 0.65);
+}
+.atb-button:hover:not(:disabled) { box-shadow: 0 14px 38px -8px rgba(225, 154, 255, 0.85); filter: brightness(1.06); }
+.atb-button:active:not(:disabled) { transform: scale(0.985); }
+.atb-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.atb-button:disabled { cursor: progress; filter: saturate(0.7) brightness(0.9); }
+.atb-button span { display: inline-block; transition: transform 0.15s ease-out; }
+
+.atb-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 155, 176, 0.4);
+  background: rgba(255, 155, 176, 0.08);
+  color: var(--danger);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.atb-error b { display: block; margin-bottom: 2px; color: var(--ink); font-weight: 500; }
+
+.atb-help { margin: 28px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.atb-help a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: rgba(225, 154, 255, 0.5); }
+.atb-help a:hover { text-decoration-color: var(--violet); }
+.atb-help a:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; border-radius: 4px; }
+
+@media (max-width: 900px) {
+  .atb-login { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .atb-stage { padding: 88px 20px 32px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .atb-scene-wrap { width: min(52vw, 260px); height: min(52vw, 260px); }
+  .atb-caption { display: none; }
+  .atb-panel { align-items: flex-start; padding-top: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atb-blades { animation: none; }
+  .atb-lens-core { animation: none; opacity: 0.85; }
+  .atb-chip-float { animation: none; }
+  .atb-rig, .atb-input, .atb-button, .atb-button span, .atb-blade { transition: none; }
+}
+`;
 
 export default function LoginPage() {
+  const [email, setEmail] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [btnOffset, setBtnOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(query.matches);
+    const handleChange = () => setReducedMotion(query.matches);
+    query.addEventListener("change", handleChange);
+    return () => query.removeEventListener("change", handleChange);
+  }, []);
+
+  const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (reducedMotion) return;
+    const rect = stageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const relX = (e.clientX - rect.left) / rect.width - 0.5;
+    const relY = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: relY * -18, y: relX * 22 });
+  };
+
+  const handleStagePointerLeave = () => setTilt({ x: 0, y: 0 });
+
+  const handleButtonPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (reducedMotion || loading) return;
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const relX = (e.clientX - rect.left) / rect.width - 0.5;
+    const relY = (e.clientY - rect.top) / rect.height - 0.5;
+    setBtnOffset({ x: relX * 10, y: relY * 8 });
+  };
+
+  const handleButtonPointerLeave = () => setBtnOffset({ x: 0, y: 0 });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
-    const res = await signIn("magic-link", {
-      email: email.toLowerCase(),
-      token: "dev-token",
-      redirect: false,
-    });
-
-    setLoading(false);
-
-    if (res?.error) {
-      setError(res.error);
-      return;
+    try {
+      const res = await signIn("magic-link", {
+        email: email.toLowerCase(),
+        token: "dev-token",
+        redirect: false,
+      });
+      if (res?.error) {
+        setError(res.error);
+        return;
+      }
+      router.push("/client");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    router.push("/client");
-    router.refresh();
   };
 
+  const iris = loading ? 1 : Math.min(email.length, 20) / 20;
+
   return (
-    <div
-      className="relative min-h-screen overflow-hidden"
-      style={{ background: "#05060A" }}
-    >
-      {/* Ambient purple glows */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: "-15%",
-          left: "10%",
-          width: "600px",
-          height: "600px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 60%)",
-          filter: "blur(100px)",
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: "30%",
-          right: "-20%",
-          width: "500px",
-          height: "500px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(109, 40, 217, 0.2) 0%, transparent 60%)",
-          filter: "blur(100px)",
-        }}
-      />
+    <main className="atb-login">
+      <style>{styles}</style>
 
-      {/* ============ TOP: BRANDING ============ */}
-      <div className="relative z-20 pt-8 px-6 text-center">
-        <motion.h1
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="font-black leading-none"
-          style={{
-            fontSize: "clamp(2.25rem, 10vw, 3.5rem)",
-            letterSpacing: "-0.03em",
-          }}
-        >
-          <span
-            className="text-white"
-            style={{
-              textShadow: "0 0 40px rgba(255,255,255,0.15)",
-            }}
-          >
-            ATB{" "}
-          </span>
-          <span
-            style={{
-              background:
-                "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 40%, #7C3AED 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              textShadow: "0 0 60px rgba(139, 92, 246, 0.6)",
-              display: "inline-block",
-            }}
-          >
-            Visuals
-          </span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="text-[11px] md:text-xs font-semibold mt-3"
-          style={{
-            color: "#FFFFFF",
-            letterSpacing: "0.45em",
-            opacity: 0.9,
-          }}
-        >
-          CLIENT PORTAL
-        </motion.p>
-      </div>
-
-      {/* ============ BACKGROUND WATERMARK ============ */}
-      <div
-        className="absolute pointer-events-none select-none z-0"
-        style={{
-          top: "32%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          textAlign: "center",
-          fontSize: "clamp(6rem, 22vw, 14rem)",
-          fontWeight: 900,
-          letterSpacing: "-0.05em",
-          color: "rgba(139, 92, 246, 0.08)",
-          lineHeight: 1,
-          whiteSpace: "nowrap",
-        }}
+      <section
+        className="atb-stage"
+        aria-hidden="true"
+        ref={stageRef}
+        onPointerMove={handleStagePointerMove}
+        onPointerLeave={handleStagePointerLeave}
       >
-        ATB
-      </div>
-      <div
-        className="absolute pointer-events-none select-none z-0"
-        style={{
-          top: "48%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          textAlign: "center",
-          fontSize: "clamp(2rem, 8vw, 5rem)",
-          fontWeight: 700,
-          letterSpacing: "0.3em",
-          color: "rgba(139, 92, 246, 0.06)",
-          lineHeight: 1,
-          whiteSpace: "nowrap",
-        }}
-      >
-        VISUALS
-      </div>
+        <div className="atb-brand">
+          <span className="atb-mark" />
+          ATB Visuals
+        </div>
 
-      {/* ============ FLOATING PORTFOLIO CARDS ============ */}
-      <PortfolioCards />
-
-      {/* ============ CENTER CONTENT ============ */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-6 min-h-[calc(100vh-140px)] pb-48 pt-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-md text-center"
-        >
-          {/* Headline */}
-          <motion.h2
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.5,
-              duration: 0.8,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="font-black mb-4 leading-tight"
+        <div className="atb-scene-wrap">
+          <div
+            className="atb-rig"
             style={{
-              fontSize: "clamp(2rem, 8.5vw, 3rem)",
-              letterSpacing: "-0.03em",
+              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
             }}
           >
-            <span
-              style={{
-                background:
-                  "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #7C3AED 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                textShadow: "0 0 50px rgba(139, 92, 246, 0.4)",
-              }}
-            >
-              Welcome{" "}
-            </span>
-            <span className="text-white">Back !</span>
-          </motion.h2>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.65, duration: 0.6 }}
-            className="text-[13px] md:text-sm leading-relaxed mb-10 mx-auto"
-            style={{ color: "#B8BCC8", maxWidth: "340px" }}
-          >
-            Access your Projects, Chat with ATB, Review Edits and Stay Updated —
-            All in one Place!
-          </motion.p>
-
-          {/* Form */}
-          <motion.form
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-4 max-w-sm mx-auto"
-          >
-            {/* Email input */}
-            <div className="relative">
-              <div
-                className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ color: "#8B8FA0" }}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  className="w-5 h-5"
-                >
-                  <rect x="2" y="4" width="20" height="16" rx="2" />
-                  <path d="M2 7l10 6 10-6" />
-                </svg>
+            <div className="atb-orbit o3" />
+            <div className="atb-orbit o2" />
+            <div className="atb-lens-ring" />
+            <div className="atb-lens-glass">
+              <div className="atb-blades" style={loading ? { animationDuration: "2.4s" } : undefined}>
+                {BLADES.map((i) => (
+                  <span
+                    key={i}
+                    className="atb-blade"
+                    style={{ ["--i" as string]: i, ["--iris" as string]: iris } as React.CSSProperties}
+                  />
+                ))}
               </div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="yourself@email.com"
-                className="w-full pl-14 pr-5 py-4 rounded-full text-sm transition-all"
-                style={{
-                  background: "rgba(20, 22, 30, 0.75)",
-                  border: "1.5px solid rgba(255, 255, 255, 0.08)",
-                  color: "#FFFFFF",
-                  backdropFilter: "blur(12px)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "rgba(139, 92, 246, 0.6)";
-                  e.target.style.boxShadow =
-                    "0 0 0 4px rgba(139, 92, 246, 0.12)";
-                  e.target.style.background = "rgba(20, 22, 30, 0.95)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                  e.target.style.boxShadow = "none";
-                  e.target.style.background = "rgba(20, 22, 30, 0.75)";
-                }}
-              />
+              <div className={loading ? "atb-lens-core active" : "atb-lens-core"} />
             </div>
 
-            {/* Error */}
+            <div className="atb-chip c1" style={{ transform: `translate3d(${tilt.y * 0.6}px, ${tilt.x * 0.6}px, 0)` }}>
+              <div className="atb-chip-float" style={{ width: "100%", height: "100%" }} />
+            </div>
+            <div className="atb-chip c2" style={{ transform: `translate3d(${tilt.y * 0.9}px, ${tilt.x * 0.9}px, 0)` }}>
+              <div className="atb-chip-float" style={{ width: "100%", height: "100%" }} />
+            </div>
+            <div className="atb-chip c3" style={{ transform: `translate3d(${tilt.y * 0.4}px, ${tilt.x * 0.4}px, 0)` }}>
+              <div className="atb-chip-float" style={{ width: "100%", height: "100%" }} />
+            </div>
+          </div>
+        </div>
+
+        <p className="atb-caption">
+          <strong>{loading ? "Focusing on your account..." : "Every project, in focus."}</strong>
+          <br />
+          Review cuts, leave feedback and download finals from your client dashboard.
+        </p>
+      </section>
+
+      <section className="atb-panel">
+        <div className="atb-form-wrap">
+          <h1 className="atb-title">Your cuts are waiting.</h1>
+          <p className="atb-sub">
+            Enter the email ATB Visuals has Provided to open your projects.
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate={false}>
+            <label className="atb-field" htmlFor="email">
+              <span>Email</span>
+              <input
+                id="email"
+                name="email"
+                className="atb-input"
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="you@studio.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
+
+            <button
+              ref={buttonRef}
+              className="atb-button"
+              type="submit"
+              disabled={loading}
+              onPointerMove={handleButtonPointerMove}
+              onPointerLeave={handleButtonPointerLeave}
+            >
+              <span style={{ transform: `translate(${btnOffset.x}px, ${btnOffset.y}px)` }}>
+                {loading ? "Logging in..." : "Log In →"}
+              </span>
+            </button>
+
             {error && (
-              <div
-                className="text-xs py-2.5 px-4 rounded-full text-center"
-                style={{
-                  background: "rgba(239, 68, 68, 0.1)",
-                  color: "#FCA5A5",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                }}
-              >
+              <div className="atb-error" role="alert">
+                <b>Couldn&apos;t log you in</b>
                 {error}
               </div>
             )}
+          </form>
 
-            {/* Submit — pill-shaped */}
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: loading ? 1 : 1.01 }}
-              whileTap={{ scale: loading ? 1 : 0.99 }}
-              className="w-full py-4 rounded-full text-white font-bold text-sm cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-              style={{
-                background:
-                  "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)",
-                boxShadow:
-                  "0 12px 32px rgba(139, 92, 246, 0.45), 0 0 0 1px rgba(255,255,255,0.1) inset, inset 0 1px 0 rgba(255,255,255,0.25)",
-              }}
-            >
-              {loading ? "Logging in..." : "Log In →"}
-            </motion.button>
-          </motion.form>
-
-          {/* Footer note */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="mt-12"
-          >
-            <p
-              className="text-[12px] leading-relaxed font-medium"
-              style={{ color: "#B8BCC8" }}
-            >
-              Client Access only.
-            </p>
-            <p
-              className="text-[12px] leading-relaxed font-medium"
-              style={{ color: "#B8BCC8" }}
-            >
-              Contact &quot;ATB Visuals&quot; for an account
-            </p>
-
-            {/* Divider dots */}
-            <div className="flex items-center justify-center gap-3 mt-8">
-              <div
-                className="w-1 h-1 rounded-full"
-                style={{ background: "rgba(255,255,255,0.3)" }}
-              />
-              <div
-                className="w-24 h-px"
-                style={{ background: "rgba(255,255,255,0.15)" }}
-              />
-              <div
-                className="w-1 h-1 rounded-full"
-                style={{ background: "rgba(255,255,255,0.3)" }}
-              />
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* ============ SIGNATURE — bottom-left ============ */}
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.2, duration: 1 }}
-        className="absolute z-20 pointer-events-none"
-        style={{
-          left: "24px",
-          bottom: "100px",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "var(--font-caveat), cursive",
-            color: "rgba(255,255,255,0.92)",
-            textShadow: "0 0 30px rgba(139, 92, 246, 0.6)",
-            transform: "rotate(-4deg)",
-            fontSize: "clamp(1.75rem, 6vw, 2.25rem)",
-            lineHeight: "0.95",
-            fontWeight: 700,
-          }}
-        >
-          Let&apos;s
-          <br />
-          Create
-          <br />
-          Something
-          <br />
-          Amazing.
-        </p>
-      </motion.div>
-
-      {/* ============ BACKGROUND IMAGE ============ */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage:
-            "url('https://ik.imagekit.io/5xwchyocd7/login-bg.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: 0.75,
-        }}
-      />
-      {/* Dark overlay for text readability */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(5, 6, 10, 0.55) 0%, rgba(5, 6, 10, 0.35) 40%, rgba(5, 6, 10, 0.65) 100%)",
-        }}
-      />
-    </div>
+          <p className="atb-help">
+            No access yet? Email{" "}
+            <a href="mailto:visuals.atb@gmail.com">visuals.atb@gmail.com</a> and
+            we&apos;ll add you.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
