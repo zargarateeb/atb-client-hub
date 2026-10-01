@@ -355,7 +355,7 @@ const styles = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px 200px;
+  padding: 40px 20px 260px;
 }
 
 .atbx-brand-wrap {
@@ -597,31 +597,147 @@ const styles = `
 }
 
 /* ============ RESPONSIVE ============ */
+/* ============ MOBILE — KEEP FULL EXPERIENCE ============ */
 @media (max-width: 860px) {
-  .atbx-main { padding: 32px 16px 60px; }
-  .atbx-timeline { display: none; }
+  /* Main content padding — smaller, tighter */
+  .atbx-main {
+    padding: 24px 16px 220px;
+    min-height: calc(100dvh - 44px);
+  }
+
+  /* Timeline — visible but shorter and tighter */
+  .atbx-timeline {
+    padding: 12px 14px 16px;
+    opacity: 0.75;
+  }
+  .atbx-tl-grid {
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+  .atbx-tl-labels {
+    padding-top: 18px;
+    grid-auto-rows: 32px;
+    row-gap: 4px;
+  }
+  .atbx-tl-labels span {
+    font-size: 8px;
+  }
+  .atbx-tl-labels span:nth-child(3) {
+    height: 40px;
+  }
+  .atbx-tl-ruler {
+    height: 12px;
+    margin-bottom: 4px;
+  }
+  .atbx-tl-lane {
+    height: 32px;
+    margin-bottom: 4px;
+  }
+  .atbx-tl-lane.audio {
+    height: 40px;
+  }
+
+  /* Corner text — kept, smaller */
   .atbx-corner-tl,
-  .atbx-corner-tr { display: none; }
-  .atbx-crosshair { display: none; }
-  .atbx-node { display: none; }
+  .atbx-corner-tr {
+    top: 54px;
+    font-size: 8px;
+    letter-spacing: 0.22em;
+  }
+  .atbx-corner-tl {
+    left: 14px;
+    gap: 2px;
+  }
+  .atbx-corner-tr {
+    right: 14px;
+    gap: 2px;
+  }
+
+  /* Crosshair + nodes — kept, subtle */
+  .atbx-crosshair {
+    top: 44px;
+    opacity: 0.6;
+  }
+  .atbx-node {
+    width: 5px;
+    height: 5px;
+    margin-left: -2.5px;
+  }
+
+  /* Chrome — hide subtitle/timecode to avoid crowding */
+  .atbx-chrome {
+    padding: 0 12px;
+    height: 40px;
+    gap: 10px;
+  }
+  .atbx-chrome-app .sub,
+  .atbx-chrome-tc {
+    display: none;
+  }
+  .atbx-chrome-app img {
+    width: 16px;
+    height: 16px;
+  }
+  .atbx-chrome-app .name {
+    font-size: 12px;
+  }
+
+  /* Brand */
+  .atbx-brand-wrap {
+    margin-bottom: 16px;
+  }
+  .atbx-brand-sub {
+    font-size: 10px;
+    letter-spacing: 0.35em;
+  }
+  .atbx-brand-tags {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+  }
+
+  /* Welcome */
+  .atbx-welcome {
+    margin-bottom: 18px;
+  }
+  .atbx-welcome p {
+    font-size: 12px;
+    max-width: 300px;
+  }
+
+  /* Glass card */
+  .atbx-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+  .atbx-input {
+    height: 48px;
+    font-size: 14px;
+    padding-left: 44px;
+  }
+  .atbx-button {
+    height: 48px;
+    font-size: 14px;
+  }
+  .atbx-help {
+    font-size: 10px;
+  }
+
+  /* Signature — keep position absolute, bottom-left */
   .atbx-signature {
-    position: relative;
-    left: 0;
-    bottom: 0;
-    margin-top: 32px;
-    text-align: center;
+    left: 14px;
+    bottom: 14px;
   }
-  .atbx-signature p { transform: rotate(-3deg); }
+  .atbx-signature p {
+    font-size: 1.35rem;
+  }
+
+  /* Bottom-right tag — keep, smaller */
   .atbx-corner-br {
-    position: relative;
-    right: 0;
-    bottom: 0;
-    margin-top: 12px;
-    text-align: center;
+    right: 14px;
+    bottom: 14px;
+    font-size: 7px;
+    letter-spacing: 0.18em;
   }
-  .atbx-chrome-app .sub { display: none; }
-  .atbx-chrome-tc { display: none; }
-  .atbx-brand-wrap { margin-bottom: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
