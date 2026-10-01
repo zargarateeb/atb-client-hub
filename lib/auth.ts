@@ -7,21 +7,60 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "magic-link",
-      name: "Magic Link",
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         token: { label: "Token", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email) {
           throw new Error("Email is required");
         }
 
-        await connectDB();
+        const email = credentials.email.toLowerCase();
+        const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+        const adminPassword = process.env.ADMIN_PASSWORD;
 
-        // Find user by email
+        // Check if this is an admin email
+        if (adminEmail && email === adminEmail) {
+          // Admin requires a password
+          if (!credentials.password) {
+            throw new Error("Password required for admin access");
+          }
+          if (!adminPassword) {
+            throw new Error("Admin password not configured on server");
+          }
+          if (credentials.password !== adminPassword) {
+            throw new Error("Incorrect admin password");
+          }
+
+          // Admin login successful
+          await connectDB();
+          let admin = await User.findOne({ email });
+
+          // Auto-create admin user if missing
+          if (!admin) {
+            admin = await User.create({
+              email,
+              name: "Ateeb",
+              role: "admin",
+              active: true,
+            });
+          }
+
+          return {
+            id: admin._id.toString(),
+            email: admin.email,
+            name: admin.name,
+            role: "admin",
+          };
+        }
+
+        // Regular client flow — email only
+        await connectDB();
         const user = await User.findOne({
-          email: credentials.email.toLowerCase(),
+          email,
           active: true,
         });
 
@@ -29,8 +68,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No account found with this email");
         }
 
-        // Token validation would happen here in production
-        // For MVP, if email exists, allow login
         return {
           id: user._id.toString(),
           email: user.email,

@@ -771,6 +771,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
+  const isAdminEmail = adminEmail && email.toLowerCase() === adminEmail;
   const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState<boolean>(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -803,12 +807,14 @@ export default function LoginPage() {
       const res = await signIn("magic-link", {
         email: email.toLowerCase(),
         token: "dev-token",
+        password: isAdminEmail ? password : "",
         redirect: false,
       });
       if (res?.error) {
         setError(res.error);
         return;
       }
+      // Check role and redirect accordingly
       const sessionRes = await fetch("/api/auth/session");
       const sessionData = await sessionRes.json();
       if (sessionData?.user?.role === "admin") {
@@ -974,6 +980,91 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {isAdminEmail && (
+  <div className="atb-field" style={{ marginTop: 12 }}>
+    <div style={{ position: "relative" }}>
+      <span
+        className="atbx-field-icon"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 16,
+          top: "50%",
+          transform: "translateY(-50%)",
+          color: "rgba(255,255,255,0.45)",
+          pointerEvents: "none",
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          width="18"
+          height="18"
+        >
+          <rect x="4" y="10" width="16" height="11" rx="2" />
+          <path d="M8 10V7a4 4 0 1 1 8 0v3" />
+        </svg>
+      </span>
+      <input
+        id="password"
+        name="password"
+        className="atb-input"
+        type={showPassword ? "text" : "password"}
+        required
+        autoComplete="current-password"
+        placeholder="Enter admin password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword((p) => !p)}
+        aria-label={showPassword ? "Hide password" : "Show password"}
+        style={{
+          position: "absolute",
+          right: 16,
+          top: "50%",
+          transform: "translateY(-50%)",
+          color: "rgba(255,255,255,0.55)",
+          background: "transparent",
+          border: 0,
+          cursor: "pointer",
+          padding: 4,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {showPassword ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M3 3l18 18" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        )}
+      </button>
+    </div>
+    <p
+      style={{
+        fontSize: 10,
+        color: "#b98bff",
+        marginTop: 6,
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        fontWeight: 600,
+      }}
+    >
+      ⚿ Admin access — password required
+    </p>
+  </div>
+)}
             </label>
 
             <button className="atbx-button" type="submit" disabled={loading}>
