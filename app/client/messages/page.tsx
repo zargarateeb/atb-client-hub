@@ -1,60 +1,79 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import MessagesThread from "@/components/MessagesThread";
+
+interface Project {
+  _id: string;
+  title: string;
+}
+
 export default function MessagesPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const res = await fetch("/api/projects", { cache: "no-store" });
+      const data = await res.json();
+      if (data.success && data.projects.length > 0) {
+        setProjects(data.projects);
+        setSelected(data.projects[0]._id);
+      }
+      setLoading(false);
+    };
+    fetchProjects();
+  }, []);
+
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <p
-          className="text-[10px] font-bold tracking-[0.15em] uppercase mb-2"
-          style={{ color: "#8B5CF6" }}
-        >
+    <div className="p-5 md:p-8 max-w-5xl mx-auto">
+      <div className="mb-6">
+        <p className="label-caps mb-1" style={{ color: "#6a5f7c" }}>
           Communication
         </p>
-        <h1
-          className="font-black text-white mb-2"
-          style={{
-            fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Messages
-        </h1>
-        <p className="text-sm" style={{ color: "#A0A3B1" }}>
-          Chat with Ateeb about your projects — no more WhatsApp chaos.
+        <h1 className="text-editorial text-white text-2xl">Messages</h1>
+        <p className="text-sm mt-1" style={{ color: "#9a8fb0" }}>
+          Chat with ATB about your projects.
         </p>
       </div>
 
-      {/* Empty state */}
-      <div
-        className="p-16 rounded-3xl flex flex-col items-center text-center"
-        style={{
-          background: "#11131A",
-          border: "1px dashed rgba(255,255,255,0.1)",
-        }}
-      >
-        <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
-          style={{ background: "rgba(59, 130, 246, 0.12)" }}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#60A5FA"
-            strokeWidth="1.5"
-            className="w-7 h-7"
-          >
-            <path d="M21 12a8 8 0 1 1-3.2-6.4L21 4l-1.2 3.6A8 8 0 0 1 21 12z" />
-          </svg>
+      {loading ? (
+        <div className="p-12 text-center glass rounded-2xl">
+          <p className="text-sm" style={{ color: "#6a5f7c" }}>Loading...</p>
         </div>
-        <h2 className="font-bold text-white text-lg mb-2">
-          Full messaging coming soon
-        </h2>
-        <p className="text-sm max-w-sm" style={{ color: "#6B6F80" }}>
-          Real-time chat, file sharing, and project-linked conversation threads
-          are being built for Hub v2.
-        </p>
-      </div>
+      ) : projects.length === 0 ? (
+        <div className="p-12 text-center glass rounded-2xl">
+          <p className="text-sm" style={{ color: "#9a8fb0" }}>
+            No projects yet.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Project selector */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
+            {projects.map((p) => (
+              <button
+                key={p._id}
+                onClick={() => setSelected(p._id)}
+                className="px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all"
+                style={{
+                  background:
+                    selected === p._id
+                      ? "linear-gradient(135deg, #e3c8ff, #b98bff)"
+                      : "rgba(185, 139, 255, 0.08)",
+                  color: selected === p._id ? "#1c0a33" : "#9a8fb0",
+                  border: "1px solid rgba(185, 139, 255, 0.2)",
+                }}
+              >
+                {p.title}
+              </button>
+            ))}
+          </div>
+
+          {selected && <MessagesThread projectId={selected} />}
+        </>
+      )}
     </div>
   );
 }

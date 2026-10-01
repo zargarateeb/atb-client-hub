@@ -15,6 +15,7 @@ const MessageSchema = new Schema<IMessage>(
       type: Schema.Types.ObjectId,
       ref: "Project",
       required: true,
+      index: true,
     },
     senderId: {
       type: Schema.Types.ObjectId,
@@ -28,7 +29,7 @@ const MessageSchema = new Schema<IMessage>(
     },
     text: { type: String, required: true, trim: true },
     read: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now, index: true },
   },
   { timestamps: true }
 );

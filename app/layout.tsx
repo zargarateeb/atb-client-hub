@@ -24,6 +24,13 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: "ATB Client Hub",
   description: "Private workspace for ATB Visuals clients",
+  manifest: "/manifest.json",
+  themeColor: "#b98bff",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ATB Hub",
+  },
 };
 
 export default function RootLayout({

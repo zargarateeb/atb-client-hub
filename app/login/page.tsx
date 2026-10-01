@@ -809,7 +809,13 @@ export default function LoginPage() {
         setError(res.error);
         return;
       }
-      router.push("/client");
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+      if (sessionData?.user?.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/client");
+      }
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
