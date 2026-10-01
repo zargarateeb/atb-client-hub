@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { Poppins, Caveat } from "next/font/google";
+import { Hanken_Grotesk, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const hanken = Hanken_Grotesk({
+  variable: "--font-hanken",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 const caveat = Caveat({
@@ -27,7 +33,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} ${caveat.variable} antialiased`}>
+      <body
+        className={`${hanken.variable} ${jetbrains.variable} ${caveat.variable} antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

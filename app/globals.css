@@ -1,38 +1,39 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Surfaces */
-  --color-bg-base: #08090D;
-  --color-bg-surface: #0B0C11;
-  --color-bg-card: #11131A;
-  --color-bg-card-hover: #171923;
-  --color-bg-elevated: #1A1D28;
+  /* Base */
+  --color-bg-base: #050208;
+  --color-bg-surface: #0a0512;
+  --color-bg-card: rgba(15, 8, 25, 0.55);
+  --color-bg-card-solid: #0d0718;
+  --color-bg-elevated: #150e26;
 
   /* Borders */
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-default: rgba(255, 255, 255, 0.09);
-  --color-border-strong: rgba(255, 255, 255, 0.14);
+  --color-border-subtle: rgba(185, 139, 255, 0.12);
+  --color-border-default: rgba(185, 139, 255, 0.22);
+  --color-border-strong: rgba(185, 139, 255, 0.4);
 
   /* Text */
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A0A3B1;
-  --color-text-tertiary: #6B6F80;
-  --color-text-muted: #4A4D5C;
+  --color-text-primary: #f6ecfb;
+  --color-text-secondary: #9a8fb0;
+  --color-text-tertiary: #6a5f7c;
+  --color-text-muted: #4a4155;
 
   /* Accents */
-  --color-purple: #8B5CF6;
-  --color-purple-bright: #A78BFA;
-  --color-purple-deep: #6D28D9;
-  --color-purple-glow: rgba(139, 92, 246, 0.4);
+  --color-violet: #b98bff;
+  --color-violet-bright: #e3c8ff;
+  --color-violet-deep: #8b5cf6;
+  --color-violet-glow: rgba(185, 139, 255, 0.4);
 
   /* Status */
-  --color-success: #10B981;
-  --color-info: #3B82F6;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
+  --color-success: #4ade80;
+  --color-info: #60a5fa;
+  --color-warning: #fbbf24;
+  --color-danger: #ff9bb0;
 
   /* Fonts */
-  --font-sans: var(--font-poppins), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-hanken), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-script: var(--font-caveat), cursive;
 }
 
@@ -45,16 +46,16 @@ html, body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background: #08090D;
-  color: #FFFFFF;
+  background: #050208;
+  color: #f6ecfb;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: #8B5CF6;
-  color: white;
+  background: #b98bff;
+  color: #1c0a33;
 }
 
 button:focus, input:focus, a:focus {
@@ -63,50 +64,131 @@ button:focus, input:focus, a:focus {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #08090D;
+  background: #050208;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 5px;
-  border: 2px solid #08090D;
+  background: rgba(185, 139, 255, 0.15);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(185, 139, 255, 0.3);
 }
 
-/* Utility classes */
-.surface-card {
-  background: #11131A;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+/* ============ CINEMATIC UTILITIES ============ */
+
+/* Glass surface */
+.glass {
+  background: rgba(15, 8, 25, 0.55);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(185, 139, 255, 0.16);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 8px 24px rgba(0, 0, 0, 0.4);
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
 }
 
-.surface-card-hover {
-  transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+.glass-hover {
+  transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.surface-card-hover:hover {
-  background: #171923;
-  border-color: rgba(139, 92, 246, 0.3);
+.glass-hover:hover {
+  background: rgba(21, 14, 38, 0.7);
+  border-color: rgba(185, 139, 255, 0.35);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(139, 92, 246, 0.1);
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(185, 139, 255, 0.1) inset,
+    0 0 60px rgba(185, 139, 255, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
-.purple-glow {
-  box-shadow:
-    0 0 24px rgba(139, 92, 246, 0.35),
-    0 0 48px rgba(139, 92, 246, 0.15);
-}
-
+/* Editorial heading */
 .text-editorial {
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-weight: 800;
+}
+
+/* Monospace timecode */
+.tc {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Label (small caps tracked) */
+.label-caps {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* Purple glow */
+.violet-glow {
+  box-shadow:
+    0 0 24px rgba(185, 139, 255, 0.35),
+    0 0 48px rgba(185, 139, 255, 0.15);
+}
+
+/* Blob animations */
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3%, -2%) scale(1.06); }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+}
+.blob-1 {
+  width: 55vw;
+  height: 55vw;
+  top: -20%;
+  left: -15%;
+  background: radial-gradient(circle, rgba(120, 50, 200, 0.28) 0%, transparent 70%);
+  animation: blob-drift 18s ease-in-out infinite;
+}
+.blob-2 {
+  width: 48vw;
+  height: 48vw;
+  bottom: -18%;
+  right: -12%;
+  background: radial-gradient(circle, rgba(185, 139, 255, 0.18) 0%, transparent 70%);
+  animation: blob-drift 22s ease-in-out infinite reverse;
+}
+.blob-3 {
+  width: 40vw;
+  height: 40vw;
+  top: 30%;
+  right: 20%;
+  background: radial-gradient(circle, rgba(100, 40, 180, 0.15) 0%, transparent 70%);
+  animation: blob-drift 26s ease-in-out infinite;
+}
+
+/* Crosshair */
+.crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(185, 139, 255, 0.08) 10%,
+    rgba(185, 139, 255, 0.08) 75%,
+    transparent 95%
+  );
+  pointer-events: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .blob { animation: none !important; }
+  .glass-hover { transition: none; }
 }
