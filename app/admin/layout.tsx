@@ -107,7 +107,7 @@ export default function AdminLayout({
       <AdminNav />
 
       {/* Content */}
-      <main className="relative z-10 flex-1 overflow-y-auto">{children}</main>
+      <main className="relative z-10 flex-1 overflow-y-auto min-h-0">{children}</main>
     </div>
   );
 }

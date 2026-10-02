@@ -18,6 +18,12 @@ interface Project {
   createdAt: string;
 }
 
+interface ClientStats {
+  activeProjects: number;
+  deliveredProjects: number;
+  unreadMessages: number;
+}
+
 const STATUS_MAP: Record<
   Project["status"],
   "Editing" | "In Review" | "Finalizing"
@@ -69,38 +75,47 @@ function formatDeadline(dateString?: string): string {
 export default function ClientHomePage() {
   const { data: session } = useSession();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [stats, setStats] = useState<ClientStats>({
+    activeProjects: 0,
+    deliveredProjects: 0,
+    unreadMessages: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchAll = async () => {
       try {
-        const res = await fetch("/api/projects", { cache: "no-store" });
-        const data = await res.json();
-        if (data.success) {
-          setProjects(data.projects);
-        } else {
-          setError(data.error || "Failed to load projects");
-        }
+        const [projRes, statsRes] = await Promise.all([
+          fetch("/api/projects", { cache: "no-store" }),
+          fetch("/api/client/stats", { cache: "no-store" }),
+        ]);
+
+        const projData = await projRes.json();
+        const statsData = await statsRes.json();
+
+        if (projData.success) setProjects(projData.projects);
+        else setError(projData.error || "Failed to load projects");
+
+        if (statsData.success) setStats(statsData.stats);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+    fetchAll();
   }, []);
 
   const activeProjects = projects.filter(
     (p) => p.status !== "delivered" && p.status !== "cancelled"
   );
-  const deliveredProjects = projects.filter((p) => p.status === "delivered");
 
-  const stats = [
+  const statCards = [
     {
       label: "Active Projects",
-      value: activeProjects.length,
-      trend: activeProjects.length > 0 ? "1" : undefined,
+      value: stats.activeProjects,
+      trend: stats.activeProjects > 0 ? "1" : undefined,
       iconBg: "rgba(185, 139, 255, 0.15)",
       iconColor: "#e3c8ff",
       accent: "rgba(185, 139, 255, 0.4)",
@@ -112,8 +127,8 @@ export default function ClientHomePage() {
     },
     {
       label: "Delivered",
-      value: deliveredProjects.length,
-      trend: deliveredProjects.length > 0 ? "2" : undefined,
+      value: stats.deliveredProjects,
+      trend: stats.deliveredProjects > 0 ? "2" : undefined,
       iconBg: "rgba(74, 222, 128, 0.15)",
       iconColor: "#86efac",
       accent: "rgba(74, 222, 128, 0.35)",
@@ -126,26 +141,13 @@ export default function ClientHomePage() {
     },
     {
       label: "Unread Messages",
-      value: 2,
+      value: stats.unreadMessages,
       iconBg: "rgba(96, 165, 250, 0.15)",
       iconColor: "#93c5fd",
       accent: "rgba(96, 165, 250, 0.35)",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
           <path d="M21 12a8 8 0 1 1-3.2-6.4L21 4l-1.2 3.6A8 8 0 0 1 21 12z" />
-        </svg>
-      ),
-    },
-    {
-      label: "Pending Invoices",
-      value: 1,
-      iconBg: "rgba(251, 191, 36, 0.15)",
-      iconColor: "#fcd34d",
-      accent: "rgba(251, 191, 36, 0.35)",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
-          <rect x="4" y="3" width="16" height="18" rx="2" />
-          <path d="M8 8h8M8 12h8M8 16h5" />
         </svg>
       ),
     },
@@ -166,9 +168,7 @@ export default function ClientHomePage() {
         <div>
           <h1
             className="text-editorial text-white mb-2"
-            style={{
-              fontSize: "clamp(1.6rem, 3vw, 2rem)",
-            }}
+            style={{ fontSize: "clamp(1.6rem, 3vw, 2rem)" }}
           >
             Hey {session?.user?.name || "there"} 👋
           </h1>
@@ -189,9 +189,9 @@ export default function ClientHomePage() {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-        {stats.map((stat) => (
+      {/* Stats row — now 3 cards (invoices hidden) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
+        {statCards.map((stat) => (
           <StatCard
             key={stat.label}
             label={stat.label}
@@ -207,7 +207,6 @@ export default function ClientHomePage() {
 
       {/* Active Projects + Promo */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 mb-6 md:mb-8">
-        {/* Left: Active Projects */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
@@ -281,7 +280,6 @@ export default function ClientHomePage() {
           </div>
         </div>
 
-        {/* Right: Promo */}
         <div className="lg:col-span-1">
           <PromoCard />
         </div>

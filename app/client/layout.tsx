@@ -86,7 +86,7 @@ export default function ClientLayout({
         />
 
         {/* Main content — mobile has bottom padding for bottom nav */}
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-0 min-h-0">
           {children}
         </main>
       </div>

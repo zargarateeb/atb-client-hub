@@ -1,5 +1,7 @@
 "use client";
 
+import { signOut } from "next-auth/react";
+
 interface MobileTopBarProps {
   userName: string;
   onOpenDrawer: () => void;
@@ -48,23 +50,21 @@ export default function MobileTopBar({ userName, onOpenDrawer }: MobileTopBarPro
 
       {/* Actions */}
       <div className="flex items-center gap-2">
-        {/* Notification */}
+        {/* Sign out button — direct */}
         <button
-          className="relative w-10 h-10 rounded-lg flex items-center justify-center"
-          style={{ background: "rgba(15, 8, 25, 0.7)", color: "#9a8fb0" }}
-          aria-label="Notifications"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+          style={{
+            background: "rgba(255, 155, 176, 0.08)",
+            color: "#ff9bb0",
+            border: "1px solid rgba(255, 155, 176, 0.25)",
+          }}
+          aria-label="Sign out"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8z" />
-            <path d="M10 21a2 2 0 0 0 4 0" />
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5M21 12H9" />
           </svg>
-          <span
-            className="absolute top-2 right-2 w-2 h-2 rounded-full"
-            style={{
-              background: "#ff9bb0",
-              boxShadow: "0 0 6px rgba(255, 155, 176, 0.8)",
-            }}
-          />
         </button>
 
         {/* Profile button — opens drawer */}

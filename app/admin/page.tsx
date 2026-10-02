@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import ProjectModal from "@/components/ProjectModal";
+import StatCard from "@/components/StatCard";
 
 interface Client {
   _id: string;
@@ -12,26 +13,101 @@ interface Client {
   projectCount: number;
 }
 
+interface AdminStats {
+  totalClients: number;
+  totalProjects: number;
+  activeProjects: number;
+  deliveredProjects: number;
+  unreadMessages: number;
+  totalFiles: number;
+}
+
 export default function AdminOverviewPage() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [stats, setStats] = useState<AdminStats>({
+    totalClients: 0,
+    totalProjects: 0,
+    activeProjects: 0,
+    deliveredProjects: 0,
+    unreadMessages: 0,
+    totalFiles: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const fetchClients = async () => {
-    const res = await fetch("/api/admin/clients", { cache: "no-store" });
-    const data = await res.json();
-    if (data.success) setClients(data.clients);
+  const fetchAll = async () => {
+    const [clientsRes, statsRes] = await Promise.all([
+      fetch("/api/admin/clients", { cache: "no-store" }),
+      fetch("/api/admin/stats", { cache: "no-store" }),
+    ]);
+    const clientsData = await clientsRes.json();
+    const statsData = await statsRes.json();
+    if (clientsData.success) setClients(clientsData.clients);
+    if (statsData.success) setStats(statsData.stats);
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchClients();
+    fetchAll();
   }, []);
+
+  const statCards = [
+    {
+      label: "Active Projects",
+      value: stats.activeProjects,
+      iconBg: "rgba(185, 139, 255, 0.15)",
+      iconColor: "#e3c8ff",
+      accent: "rgba(185, 139, 255, 0.4)",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Delivered",
+      value: stats.deliveredProjects,
+      iconBg: "rgba(74, 222, 128, 0.15)",
+      iconColor: "#86efac",
+      accent: "rgba(74, 222, 128, 0.35)",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+      ),
+    },
+    {
+      label: "Unread Messages",
+      value: stats.unreadMessages,
+      iconBg: "rgba(96, 165, 250, 0.15)",
+      iconColor: "#93c5fd",
+      accent: "rgba(96, 165, 250, 0.35)",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+          <path d="M21 12a8 8 0 1 1-3.2-6.4L21 4l-1.2 3.6A8 8 0 0 1 21 12z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Total Clients",
+      value: stats.totalClients,
+      iconBg: "rgba(251, 191, 36, 0.15)",
+      iconColor: "#fcd34d",
+      accent: "rgba(251, 191, 36, 0.35)",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+        </svg>
+      ),
+    },
+  ];
 
   return (
     <div className="p-5 md:p-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <p className="label-caps mb-1" style={{ color: "#6a5f7c" }}>
           Overview
         </p>
@@ -41,6 +117,21 @@ export default function AdminOverviewPage() {
         <p className="text-sm mt-1" style={{ color: "#9a8fb0" }}>
           Manage your clients and their active work.
         </p>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
+        {statCards.map((stat) => (
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            icon={stat.icon}
+            iconBg={stat.iconBg}
+            iconColor={stat.iconColor}
+            accent={stat.accent}
+          />
+        ))}
       </div>
 
       {/* Quick actions */}
@@ -147,7 +238,7 @@ export default function AdminOverviewPage() {
       <ProjectModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSaved={fetchClients}
+        onSaved={fetchAll}
       />
     </div>
   );

@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import Project from "@/lib/models/Project";
+import Message from "@/lib/models/Message";
+import FileAsset from "@/lib/models/FileAsset";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -43,6 +45,48 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     }
 
     return NextResponse.json({ success: true, project });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(_req: NextRequest, context: RouteContext) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    await connectDB();
+    const admin = await User.findOne({
+      email: session.user.email.toLowerCase(),
+    });
+    if (!admin || admin.role !== "admin") {
+      return NextResponse.json(
+        { success: false, error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await context.params;
+
+    // Delete associated messages + files
+    await Promise.all([
+      Message.deleteMany({ projectId: id }),
+      FileAsset.deleteMany({ projectId: id }),
+      Project.findByIdAndDelete(id),
+    ]);
+
+    return NextResponse.json({ success: true, message: "Deleted" });
   } catch (error) {
     return NextResponse.json(
       {

@@ -38,7 +38,7 @@ export default function AdminMessagesPage() {
   }, []);
 
   return (
-    <div className="p-5 md:p-8 max-w-6xl mx-auto">
+    <div className="p-5 md:p-8 max-w-6xl mx-auto pb-24 md:pb-8">
       <div className="mb-6">
         <p className="label-caps mb-1" style={{ color: "#6a5f7c" }}>
           Inbox

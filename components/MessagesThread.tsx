@@ -70,19 +70,20 @@ export default function MessagesThread({ projectId }: MessagesThreadProps) {
   return (
     <div
       className="flex flex-col rounded-2xl glass overflow-hidden"
-      style={{ height: "500px" }}
+      style={{ height: "600px" }}
     >
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
         {messages.length === 0 ? (
-          <p className="text-center text-xs my-auto" style={{ color: "#6a5f7c" }}>
-            No messages yet. Start the conversation.
-          </p>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-xs" style={{ color: "#6a5f7c" }}>
+              No messages yet. Start the conversation.
+            </p>
+          </div>
         ) : (
           messages.map((msg) => {
             const isOwn =
-              msg.senderRole ===
-              (session?.user as { role?: string })?.role;
+              msg.senderRole === (session?.user as { role?: string })?.role;
             return (
               <motion.div
                 key={msg._id}
@@ -97,7 +98,9 @@ export default function MessagesThread({ projectId }: MessagesThreadProps) {
                       ? "linear-gradient(135deg, #8b5cf6, #7c3aed)"
                       : "rgba(185, 139, 255, 0.08)",
                     color: isOwn ? "#ffffff" : "#f6ecfb",
-                    border: isOwn ? "none" : "1px solid rgba(185, 139, 255, 0.15)",
+                    border: isOwn
+                      ? "none"
+                      : "1px solid rgba(185, 139, 255, 0.15)",
                   }}
                 >
                   <p className="text-[13px] leading-snug whitespace-pre-wrap">
@@ -105,7 +108,9 @@ export default function MessagesThread({ projectId }: MessagesThreadProps) {
                   </p>
                   <p
                     className="tc text-[9px] mt-1"
-                    style={{ color: isOwn ? "rgba(255,255,255,0.7)" : "#6a5f7c" }}
+                    style={{
+                      color: isOwn ? "rgba(255,255,255,0.7)" : "#6a5f7c",
+                    }}
                   >
                     {new Date(msg.createdAt).toLocaleTimeString("en-US", {
                       hour: "2-digit",
@@ -123,7 +128,7 @@ export default function MessagesThread({ projectId }: MessagesThreadProps) {
       {/* Input */}
       <form
         onSubmit={handleSend}
-        className="p-3 border-t flex items-center gap-2"
+        className="p-3 border-t flex items-center gap-2 flex-shrink-0"
         style={{ borderColor: "rgba(185, 139, 255, 0.14)" }}
       >
         <input
@@ -141,7 +146,7 @@ export default function MessagesThread({ projectId }: MessagesThreadProps) {
         <button
           type="submit"
           disabled={sending || !text.trim()}
-          className="px-4 py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+          className="px-4 py-2.5 rounded-lg text-sm font-bold disabled:opacity-50 flex-shrink-0"
           style={{
             background: "linear-gradient(135deg, #e3c8ff, #b98bff)",
             color: "#1c0a33",

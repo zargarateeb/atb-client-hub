@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import Project from "@/lib/models/Project";
+import Message from "@/lib/models/Message";
+import FileAsset from "@/lib/models/FileAsset";
 
 export async function GET() {
   try {
@@ -19,7 +21,6 @@ export async function GET() {
     const admin = await User.findOne({
       email: session.user.email.toLowerCase(),
     });
-
     if (!admin || admin.role !== "admin") {
       return NextResponse.json(
         { success: false, error: "Admin access required" },
@@ -27,19 +28,29 @@ export async function GET() {
       );
     }
 
-    // Only clients — filters out admins
-    const clients = await User.find({ role: "client" }).lean();
+    const [totalClients, totalProjects, activeProjects, deliveredProjects, unreadMessages, totalFiles] =
+      await Promise.all([
+        User.countDocuments({ role: "client" }),
+        Project.countDocuments({}),
+        Project.countDocuments({
+          status: { $in: ["pending", "in-progress", "review"] },
+        }),
+        Project.countDocuments({ status: "delivered" }),
+        Message.countDocuments({ senderRole: "client", read: false }),
+        FileAsset.countDocuments({}),
+      ]);
 
-    const clientsWithCounts = await Promise.all(
-      clients.map(async (client) => {
-        const projectCount = await Project.countDocuments({
-          clientId: client._id,
-        });
-        return { ...client, projectCount };
-      })
-    );
-
-    return NextResponse.json({ success: true, clients: clientsWithCounts });
+    return NextResponse.json({
+      success: true,
+      stats: {
+        totalClients,
+        totalProjects,
+        activeProjects,
+        deliveredProjects,
+        unreadMessages,
+        totalFiles,
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       {

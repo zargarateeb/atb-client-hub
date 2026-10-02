@@ -9,7 +9,7 @@ interface Project {
   status: "pending" | "in-progress" | "review" | "delivered" | "cancelled";
   price?: number;
   deliveryDate?: string;
-  clientId: { _id: string; name: string; email: string };
+  clientId: { _id: string; name: string; email: string; role?: string };
 }
 
 const STATUS_OPTIONS = ["pending", "in-progress", "review", "delivered", "cancelled"];
@@ -26,11 +26,18 @@ export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     const res = await fetch("/api/projects", { cache: "no-store" });
     const data = await res.json();
-    if (data.success) setProjects(data.projects);
+    if (data.success) {
+      // Filter out admin-owned projects (show only client projects)
+      const clientProjects = (data.projects as Project[]).filter(
+        (p) => p.clientId?.role !== "admin"
+      );
+      setProjects(clientProjects);
+    }
     setLoading(false);
   };
 
@@ -56,6 +63,32 @@ export default function AdminProjectsPage() {
     }
   };
 
+  const handleDelete = async (id: string, title: string) => {
+    if (
+      !confirm(
+        `Delete "${title}"?\n\nThis will also delete all messages and files linked to this project.`
+      )
+    )
+      return;
+
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/admin/projects/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProjects((prev) => prev.filter((p) => p._id !== id));
+      } else {
+        alert(data.error || "Failed to delete");
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="p-5 md:p-8 max-w-6xl mx-auto">
       <div className="mb-6">
@@ -64,17 +97,24 @@ export default function AdminProjectsPage() {
         </p>
         <h1 className="text-editorial text-white text-2xl">All Projects</h1>
         <p className="text-sm mt-1" style={{ color: "#9a8fb0" }}>
-          Update status and track all active work.
+          Update status and manage all client work.
         </p>
       </div>
 
       {loading ? (
         <div className="p-12 text-center glass rounded-2xl">
-          <p className="text-sm" style={{ color: "#6a5f7c" }}>Loading...</p>
+          <p className="text-sm" style={{ color: "#6a5f7c" }}>
+            Loading...
+          </p>
         </div>
       ) : projects.length === 0 ? (
         <div className="p-12 text-center glass rounded-2xl">
-          <p className="text-sm" style={{ color: "#9a8fb0" }}>No projects yet.</p>
+          <p className="text-sm mb-2" style={{ color: "#9a8fb0" }}>
+            No projects yet.
+          </p>
+          <p className="tc text-[10px]" style={{ color: "#4a4155" }}>
+            CREATE A PROJECT FROM THE OVERVIEW PAGE
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -83,7 +123,8 @@ export default function AdminProjectsPage() {
               name?: string;
               email?: string;
             };
-            const statusStyle = STATUS_COLORS[p.status] || STATUS_COLORS.pending;
+            const statusStyle =
+              STATUS_COLORS[p.status] || STATUS_COLORS.pending;
 
             return (
               <motion.div
@@ -129,7 +170,7 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                {/* Status dropdown */}
+                {/* Right side: status + delete */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span
                     className="tc text-[10px] px-2 py-1 rounded-full uppercase font-bold"
@@ -157,6 +198,32 @@ export default function AdminProjectsPage() {
                       </option>
                     ))}
                   </select>
+                  <button
+                    onClick={() => handleDelete(p._id, p.title)}
+                    disabled={deletingId === p._id}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                    style={{
+                      background: "rgba(255, 155, 176, 0.08)",
+                      color: "#ff9bb0",
+                      border: "1px solid rgba(255, 155, 176, 0.25)",
+                    }}
+                    aria-label="Delete project"
+                  >
+                    {deletingId === p._id ? (
+                      <div className="w-3 h-3 rounded-full border-2 border-t-transparent animate-spin border-[#ff9bb0]" />
+                    ) : (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        className="w-4 h-4"
+                      >
+                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                        <path d="M10 11v6M14 11v6" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </motion.div>
             );
