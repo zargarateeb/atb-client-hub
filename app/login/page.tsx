@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -101,7 +101,7 @@ const styles = `
   50% { transform: translate(4%, -3%) scale(1.08); }
 }
 
-/* ============ LAYER 3: EDITOR CHROME (titlebar) ============ */
+/* ============ LAYER 3: EDITOR CHROME ============ */
 .atbx-chrome {
   position: relative;
   z-index: 10;
@@ -161,7 +161,7 @@ const styles = `
   letter-spacing: 0.05em;
 }
 
-/* ============ LAYER 4: TIMELINE (decorative bg) ============ */
+/* ============ LAYER 4: TIMELINE ============ */
 .atbx-timeline {
   position: absolute;
   bottom: 0;
@@ -330,7 +330,7 @@ const styles = `
 .atbx-node.n2 { top: 22%; }
 .atbx-node.n3 { top: 74%; }
 
-/* ============ LAYER 6: TOP CORNERS ============ */
+/* ============ LAYER 6: CORNERS ============ */
 .atbx-corner-tl,
 .atbx-corner-tr {
   position: absolute;
@@ -355,7 +355,7 @@ const styles = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px 260px;
+  padding: 40px 20px 200px;
 }
 
 .atbx-brand-wrap {
@@ -411,7 +411,7 @@ const styles = `
   margin-top: 10px;
 }
 
-/* ============ WELCOME TEXT ============ */
+/* ============ WELCOME ============ */
 .atbx-welcome {
   position: relative;
   z-index: 10;
@@ -458,6 +458,7 @@ const styles = `
     0 0 80px rgba(185, 139, 255, 0.15);
 }
 
+/* ============ FIELDS ============ */
 .atbx-field {
   position: relative;
   display: block;
@@ -468,13 +469,16 @@ const styles = `
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.45);
+  color: #6a5f7c;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .atbx-input {
   width: 100%;
   height: 52px;
-  padding: 0 16px 0 46px;
+  padding: 0 16px 0 48px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
@@ -491,6 +495,12 @@ const styles = `
   box-shadow: 0 0 0 3px rgba(185, 139, 255, 0.14);
 }
 
+/* Password variant — extra right padding for eye toggle */
+.atbx-input.atbx-input-password {
+  padding-right: 48px;
+}
+
+/* ============ BUTTON ============ */
 .atbx-button {
   position: relative;
   overflow: hidden;
@@ -522,6 +532,7 @@ const styles = `
 .atbx-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .atbx-button:disabled { cursor: progress; filter: saturate(0.7) brightness(0.9); }
 
+/* ============ OR ============ */
 .atbx-or {
   display: flex;
   align-items: center;
@@ -542,6 +553,7 @@ const styles = `
   color: rgba(255, 255, 255, 0.45);
 }
 
+/* ============ HELP ============ */
 .atbx-help {
   margin: 0;
   text-align: center;
@@ -550,6 +562,7 @@ const styles = `
   color: rgba(246, 236, 251, 0.55);
 }
 
+/* ============ ERROR ============ */
 .atbx-error {
   margin-top: 12px;
   padding: 10px 14px;
@@ -561,6 +574,16 @@ const styles = `
   line-height: 1.45;
 }
 .atbx-error b { display: block; margin-bottom: 2px; color: var(--ink); font-weight: 500; }
+
+/* ============ ADMIN NOTICE ============ */
+.atbx-admin-notice {
+  font-size: 10px;
+  color: #b98bff;
+  margin-top: 6px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
 
 /* ============ SIGNATURE ============ */
 .atbx-signature {
@@ -597,15 +620,10 @@ const styles = `
 }
 
 /* ============ RESPONSIVE ============ */
-/* ============ MOBILE — KEEP FULL EXPERIENCE ============ */
 @media (max-width: 860px) {
-  /* Main content padding — smaller, tighter */
   .atbx-main {
     padding: 24px 16px 220px;
-    min-height: calc(100dvh - 44px);
   }
-
-  /* Timeline — visible but shorter and tighter */
   .atbx-timeline {
     padding: 12px 14px 16px;
     opacity: 0.75;
@@ -636,8 +654,6 @@ const styles = `
   .atbx-tl-lane.audio {
     height: 40px;
   }
-
-  /* Corner text — kept, smaller */
   .atbx-corner-tl,
   .atbx-corner-tr {
     top: 54px;
@@ -652,8 +668,6 @@ const styles = `
     right: 14px;
     gap: 2px;
   }
-
-  /* Crosshair + nodes — kept, subtle */
   .atbx-crosshair {
     top: 44px;
     opacity: 0.6;
@@ -663,8 +677,6 @@ const styles = `
     height: 5px;
     margin-left: -2.5px;
   }
-
-  /* Chrome — hide subtitle/timecode to avoid crowding */
   .atbx-chrome {
     padding: 0 12px;
     height: 40px;
@@ -681,8 +693,6 @@ const styles = `
   .atbx-chrome-app .name {
     font-size: 12px;
   }
-
-  /* Brand */
   .atbx-brand-wrap {
     margin-bottom: 16px;
   }
@@ -694,8 +704,6 @@ const styles = `
     font-size: 8px;
     letter-spacing: 0.2em;
   }
-
-  /* Welcome */
   .atbx-welcome {
     margin-bottom: 18px;
   }
@@ -703,8 +711,6 @@ const styles = `
     font-size: 12px;
     max-width: 300px;
   }
-
-  /* Glass card */
   .atbx-card {
     padding: 18px;
     border-radius: 18px;
@@ -714,6 +720,9 @@ const styles = `
     font-size: 14px;
     padding-left: 44px;
   }
+  .atbx-input.atbx-input-password {
+    padding-right: 44px;
+  }
   .atbx-button {
     height: 48px;
     font-size: 14px;
@@ -721,8 +730,6 @@ const styles = `
   .atbx-help {
     font-size: 10px;
   }
-
-  /* Signature — keep position absolute, bottom-left */
   .atbx-signature {
     left: 14px;
     bottom: 14px;
@@ -730,8 +737,6 @@ const styles = `
   .atbx-signature p {
     font-size: 1.35rem;
   }
-
-  /* Bottom-right tag — keep, smaller */
   .atbx-corner-br {
     right: 14px;
     bottom: 14px;
@@ -769,35 +774,14 @@ function renderClips(clips: Clip[], row: number) {
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
-  const isAdminEmail = adminEmail && email.toLowerCase() === adminEmail;
-  const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
-  const stageRef = useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const router = useRouter();
 
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(query.matches);
-    const handleChange = () => setReducedMotion(query.matches);
-    query.addEventListener("change", handleChange);
-    return () => query.removeEventListener("change", handleChange);
-  }, []);
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (reducedMotion || loading) return;
-    const rect = stageRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const relX = (e.clientX - rect.left) / rect.width - 0.5;
-    const relY = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: relY * -8, y: relX * 12 });
-  };
-
-  const handlePointerLeave = () => setTilt({ x: 0, y: 0 });
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
+  const isAdminEmail = !!adminEmail && email.toLowerCase() === adminEmail;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -810,11 +794,13 @@ export default function LoginPage() {
         password: isAdminEmail ? password : "",
         redirect: false,
       });
+
       if (res?.error) {
         setError(res.error);
         return;
       }
-      // Check role and redirect accordingly
+
+      // Role-based redirect
       const sessionRes = await fetch("/api/auth/session");
       const sessionData = await sessionRes.json();
       if (sessionData?.user?.role === "admin") {
@@ -836,15 +822,10 @@ export default function LoginPage() {
   const timecode = `00:${pad(Math.floor(frames / 24))}:${pad(frames % 24)}`;
 
   return (
-    <main
-      className="atbx"
-      ref={stageRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-    >
+    <main className="atbx">
       <style>{styles}</style>
 
-      {/* LAYER 1: Background image */}
+      {/* LAYER 1: Background */}
       <div className="atbx-bg" />
 
       {/* LAYER 2: Blobs */}
@@ -868,16 +849,18 @@ export default function LoginPage() {
           <span className="sub">Client Portal</span>
         </div>
         <div className="atbx-chrome-spacer" />
-        <span className="atbx-chrome-tc">{loading ? "REC" : timecode}</span>
+        <span className="atbx-chrome-tc">
+          {loading ? "REC" : timecode}
+        </span>
       </div>
 
-      {/* LAYER 3.5: Crosshair + nodes */}
+      {/* Crosshair + nodes */}
       <div className="atbx-crosshair" />
       <span className="atbx-node n1" />
       <span className="atbx-node n2" />
       <span className="atbx-node n3" />
 
-      {/* LAYER 4: Corner text */}
+      {/* Corner text */}
       <div className="atbx-corner-tl">
         <span>Ideas</span>
         <span>Edits</span>
@@ -890,7 +873,7 @@ export default function LoginPage() {
         <span>Brand Content</span>
       </div>
 
-      {/* LAYER 4.5: Timeline */}
+      {/* Timeline */}
       <div className="atbx-timeline" aria-hidden="true">
         <div className="atbx-tl-grid">
           <div className="atbx-tl-labels">
@@ -919,16 +902,11 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* LAYER 6: Main content */}
+      {/* Main content */}
       <div className="atbx-main">
         {/* Brand */}
         <div className="atbx-brand-wrap">
-          <div
-            className="atbx-brand-tilt"
-            style={{
-              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-            }}
-          >
+          <div className="atbx-brand-tilt">
             <h1 className="atbx-brand-name">
               <span className="left">ATB </span>
               <span className="right">Visuals</span>
@@ -955,6 +933,7 @@ export default function LoginPage() {
         {/* Glass card */}
         <div className="atbx-card">
           <form onSubmit={handleSubmit}>
+            {/* Email */}
             <label className="atbx-field" htmlFor="email">
               <span className="atbx-field-icon" aria-hidden="true">
                 <svg
@@ -980,97 +959,93 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              {isAdminEmail && (
-  <div className="atb-field" style={{ marginTop: 12 }}>
-    <div style={{ position: "relative" }}>
-      <span
-        className="atbx-field-icon"
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: 16,
-          top: "50%",
-          transform: "translateY(-50%)",
-          color: "rgba(255,255,255,0.45)",
-          pointerEvents: "none",
-        }}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          width="18"
-          height="18"
-        >
-          <rect x="4" y="10" width="16" height="11" rx="2" />
-          <path d="M8 10V7a4 4 0 1 1 8 0v3" />
-        </svg>
-      </span>
-      <input
-        id="password"
-        name="password"
-        className="atb-input"
-        type={showPassword ? "text" : "password"}
-        required
-        autoComplete="current-password"
-        placeholder="Enter admin password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword((p) => !p)}
-        aria-label={showPassword ? "Hide password" : "Show password"}
-        style={{
-          position: "absolute",
-          right: 16,
-          top: "50%",
-          transform: "translateY(-50%)",
-          color: "rgba(255,255,255,0.55)",
-          background: "transparent",
-          border: 0,
-          cursor: "pointer",
-          padding: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {showPassword ? (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
-            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-            <circle cx="12" cy="12" r="3" />
-            <path d="M3 3l18 18" />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
-            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        )}
-      </button>
-    </div>
-    <p
-      style={{
-        fontSize: 10,
-        color: "#b98bff",
-        marginTop: 6,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        fontWeight: 600,
-      }}
-    >
-      ⚿ Admin access — password required
-    </p>
-  </div>
-)}
             </label>
 
+            {/* Password — only for admin */}
+            {isAdminEmail && (
+              <label className="atbx-field" htmlFor="password">
+                <span className="atbx-field-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    width="18"
+                    height="18"
+                  >
+                    <rect x="4" y="10" width="16" height="11" rx="2" />
+                    <path d="M8 10V7a4 4 0 1 1 8 0v3" />
+                  </svg>
+                </span>
+                <input
+                  id="password"
+                  name="password"
+                  className="atbx-input atbx-input-password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  placeholder="Enter admin password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  style={{
+                    position: "absolute",
+                    right: 16,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#6a5f7c",
+                    background: "transparent",
+                    border: 0,
+                    cursor: "pointer",
+                    padding: 4,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {showPassword ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      width="18"
+                      height="18"
+                    >
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      width="18"
+                      height="18"
+                    >
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+                <p className="atbx-admin-notice">
+                  ⚿ Admin access — password required
+                </p>
+              </label>
+            )}
+
+            {/* Submit */}
             <button className="atbx-button" type="submit" disabled={loading}>
               {loading ? "Logging in..." : "Log In →"}
             </button>
 
+            {/* Error */}
             {error && (
               <div className="atbx-error" role="alert">
                 <b>Couldn&apos;t log you in</b>

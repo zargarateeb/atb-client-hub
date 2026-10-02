@@ -3,19 +3,29 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface ProjectModalProps {
+interface Project {
+  _id: string;
+  title: string;
+  description?: string;
+  status: "pending" | "in-progress" | "review" | "delivered" | "cancelled";
+  price?: number;
+  deliveryDate?: string;
+  thumbnailUrl?: string;
+}
+
+interface EditProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
+  project: Project | null;
 }
 
-export default function ProjectModal({
+export default function EditProjectModal({
   isOpen,
   onClose,
   onSaved,
-}: ProjectModalProps) {
-  const [clientEmail, setClientEmail] = useState("");
-  const [clientName, setClientName] = useState("");
+  project,
+}: EditProjectModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("pending");
@@ -26,37 +36,38 @@ export default function ProjectModal({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isOpen) {
-      setClientEmail("");
-      setClientName("");
-      setTitle("");
-      setDescription("");
-      setStatus("pending");
-      setPrice("");
-      setDeliveryDate("");
-      setThumbnailUrl("");
+    if (isOpen && project) {
+      setTitle(project.title);
+      setDescription(project.description || "");
+      setStatus(project.status);
+      setPrice(project.price?.toString() || "");
+      setDeliveryDate(
+        project.deliveryDate
+          ? new Date(project.deliveryDate).toISOString().split("T")[0]
+          : ""
+      );
+      setThumbnailUrl(project.thumbnailUrl || "");
       setError("");
     }
-  }, [isOpen]);
+  }, [isOpen, project]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!project) return;
     setError("");
     setSaving(true);
 
     try {
-      const res = await fetch("/api/admin/projects", {
-        method: "POST",
+      const res = await fetch(`/api/admin/projects/${project._id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientEmail,
-          clientName,
           title,
           description,
           status,
-          price,
-          deliveryDate,
-          thumbnailUrl,
+          price: price ? Number(price) : undefined,
+          deliveryDate: deliveryDate ? new Date(deliveryDate).toISOString() : undefined,
+          thumbnailUrl: thumbnailUrl || undefined,
         }),
       });
 
@@ -65,7 +76,7 @@ export default function ProjectModal({
         onSaved();
         onClose();
       } else {
-        setError(data.error || "Failed to create project");
+        setError(data.error || "Failed to save");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -76,7 +87,7 @@ export default function ProjectModal({
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && project && (
         <>
           <motion.div
             initial={{ opacity: 0 }}
@@ -101,44 +112,10 @@ export default function ProjectModal({
               </button>
 
               <h2 className="font-bold text-2xl text-white mb-6">
-                Create Project
+                Edit Project
               </h2>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      className="block text-xs mb-1.5 font-medium"
-                      style={{ color: "#9a8fb0" }}
-                    >
-                      Client Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={clientEmail}
-                      onChange={(e) => setClientEmail(e.target.value)}
-                      placeholder="client@example.com"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-[#4a4155] focus:border-[#b98bff] focus:outline-none text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="block text-xs mb-1.5 font-medium"
-                      style={{ color: "#9a8fb0" }}
-                    >
-                      Client Name
-                    </label>
-                    <input
-                      type="text"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      placeholder="John Doe"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-[#4a4155] focus:border-[#b98bff] focus:outline-none text-sm"
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <label
                     className="block text-xs mb-1.5 font-medium"
@@ -151,8 +128,7 @@ export default function ProjectModal({
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Brand Motion Edit — Client Name"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-[#4a4155] focus:border-[#b98bff] focus:outline-none text-sm"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#b98bff] focus:outline-none text-sm"
                   />
                 </div>
 
@@ -171,7 +147,7 @@ export default function ProjectModal({
                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-[#4a4155] focus:border-[#b98bff] focus:outline-none text-sm"
                   />
                   <p className="text-[10px] mt-1" style={{ color: "#4a4155" }}>
-                    Upload to ImageKit and paste URL. Shows as project thumbnail.
+                    Leave empty to use initials-based thumbnail.
                   </p>
                 </div>
 
@@ -202,7 +178,7 @@ export default function ProjectModal({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={2}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-[#4a4155] focus:border-[#b98bff] focus:outline-none text-sm resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#b98bff] focus:outline-none text-sm resize-none"
                   />
                 </div>
 
@@ -219,21 +195,11 @@ export default function ProjectModal({
                       onChange={(e) => setStatus(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#b98bff] focus:outline-none text-sm cursor-pointer"
                     >
-                      <option value="pending" className="bg-neutral-900">
-                        Pending
-                      </option>
-                      <option value="in-progress" className="bg-neutral-900">
-                        In Progress
-                      </option>
-                      <option value="review" className="bg-neutral-900">
-                        Review
-                      </option>
-                      <option value="delivered" className="bg-neutral-900">
-                        Delivered
-                      </option>
-                      <option value="cancelled" className="bg-neutral-900">
-                        Cancelled
-                      </option>
+                      <option value="pending" className="bg-neutral-900">Pending</option>
+                      <option value="in-progress" className="bg-neutral-900">In Progress</option>
+                      <option value="review" className="bg-neutral-900">Review</option>
+                      <option value="delivered" className="bg-neutral-900">Delivered</option>
+                      <option value="cancelled" className="bg-neutral-900">Cancelled</option>
                     </select>
                   </div>
                   <div>
@@ -247,8 +213,7 @@ export default function ProjectModal({
                       type="number"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      placeholder="5000"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-[#4a4155] focus:border-[#b98bff] focus:outline-none text-sm"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#b98bff] focus:outline-none text-sm"
                     />
                   </div>
                   <div>
@@ -284,7 +249,7 @@ export default function ProjectModal({
                     boxShadow: "0 8px 24px rgba(185, 139, 255, 0.4)",
                   }}
                 >
-                  {saving ? "Creating..." : "Create Project"}
+                  {saving ? "Saving..." : "Save Changes"}
                 </motion.button>
               </form>
             </div>

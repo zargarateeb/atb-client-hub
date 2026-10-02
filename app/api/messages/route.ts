@@ -88,6 +88,23 @@ export async function POST(req: NextRequest) {
       read: false,
     });
 
+    // Log activity
+    try {
+      const Activity = (await import("@/lib/models/Activity")).default;
+      await Activity.create({
+        projectId,
+        userId: user._id,
+        userRole: user.role,
+        type: "message-sent",
+        text:
+          user.role === "admin"
+            ? `Ateeb replied to your message`
+            : `You sent a message`,
+      });
+    } catch (e) {
+      console.error("Failed to log activity:", e);
+    }
+
     const populated = await message.populate("senderId", "name email role");
 
     return NextResponse.json(

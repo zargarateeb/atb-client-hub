@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 
 interface ProjectCardProps {
   title: string;
-  thumbnail: string;
+  thumbnail?: string;
   progress: number;
   status: "Editing" | "In Review" | "Finalizing";
   deadline: string;
-  avatars: string[];
+  avatars?: string[];
   extraCount?: number;
 }
 
@@ -33,16 +33,44 @@ const STATUS_STYLES = {
   },
 };
 
+// Derive initials from title (up to 2 letters)
+function getInitials(title: string): string {
+  const words = title
+    .replace(/[^\w\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return "AT";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+// Stable color palette based on title
+function getGradient(title: string): string {
+  const gradients = [
+    "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+    "linear-gradient(135deg, #b98bff, #8b5cf6)",
+    "linear-gradient(135deg, #60a5fa, #3b82f6)",
+    "linear-gradient(135deg, #34d399, #059669)",
+    "linear-gradient(135deg, #fbbf24, #d97706)",
+    "linear-gradient(135deg, #f472b6, #db2777)",
+  ];
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return gradients[Math.abs(hash) % gradients.length];
+}
+
 export default function ProjectCard({
   title,
   thumbnail,
   progress,
   status,
   deadline,
-  avatars,
-  extraCount,
 }: ProjectCardProps) {
   const statusStyle = STATUS_STYLES[status];
+  const initials = getInitials(title);
+  const gradient = getGradient(title);
 
   return (
     <motion.div
@@ -61,25 +89,42 @@ export default function ProjectCard({
         }}
       />
 
-      {/* Thumbnail with mini timeline overlay */}
+      {/* Thumbnail — real image OR initials fallback */}
       <div
         className="relative w-[72px] h-[72px] rounded-xl overflow-hidden flex-shrink-0"
-        style={{ background: "#0a0512" }}
+        style={{ background: gradient }}
       >
-        <img
-          src={thumbnail}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+        {thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center text-white font-black text-lg tracking-tight"
+            style={{
+              background: gradient,
+              textShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            }}
+          >
+            {initials}
+          </div>
+        )}
+
+        {/* Overlay */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(135deg, rgba(185, 139, 255, 0.25) 0%, rgba(5, 2, 8, 0.5) 100%)",
+              "linear-gradient(135deg, rgba(185, 139, 255, 0.15) 0%, rgba(5, 2, 8, 0.35) 100%)",
           }}
         />
 
-        {/* Mini timeline strip at bottom of thumbnail */}
+        {/* Mini timeline strip */}
         <div className="absolute bottom-1.5 left-1.5 right-1.5 h-[3px] flex gap-[2px]">
           {[18, 26, 14, 22].map((w, i) => (
             <div
@@ -89,7 +134,7 @@ export default function ProjectCard({
                 width: `${w}%`,
                 background:
                   i % 2 === 0
-                    ? "rgba(227, 200, 255, 0.85)"
+                    ? "rgba(227, 200, 255, 0.9)"
                     : "rgba(185, 139, 255, 0.6)",
                 boxShadow: "0 0 4px rgba(185, 139, 255, 0.5)",
               }}
@@ -116,14 +161,19 @@ export default function ProjectCard({
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
               className="h-full rounded-full relative overflow-hidden"
               style={{
-                background: "linear-gradient(90deg, #8b5cf6 0%, #b98bff 50%, #e3c8ff 100%)",
+                background:
+                  "linear-gradient(90deg, #8b5cf6 0%, #b98bff 50%, #e3c8ff 100%)",
                 boxShadow: "0 0 8px rgba(185, 139, 255, 0.6)",
               }}
             >
-              {/* Shimmer */}
               <motion.div
                 animate={{ x: ["-100%", "200%"] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear", delay: 1.5 }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: 1.5,
+                }}
                 className="absolute inset-0 w-1/2"
                 style={{
                   background:
@@ -163,7 +213,13 @@ export default function ProjectCard({
             className="tc text-[10px] flex items-center gap-1"
             style={{ color: "#6a5f7c" }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="w-2.5 h-2.5"
+            >
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 2" />
             </svg>
@@ -172,54 +228,25 @@ export default function ProjectCard({
         </div>
       </div>
 
-      {/* Right: avatars + menu */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <div className="hidden sm:flex -space-x-2">
-          {avatars.slice(0, 3).map((url, i) => (
-            <div
-              key={i}
-              className="w-6 h-6 rounded-full overflow-hidden"
-              style={{
-                border: "2px solid rgba(15, 8, 25, 0.9)",
-                boxShadow: "0 0 8px rgba(185, 139, 255, 0.2)",
-              }}
-            >
-              <img src={url} alt="" className="w-full h-full object-cover" />
-            </div>
-          ))}
-          {extraCount && extraCount > 0 && (
-            <div
-              className="tc w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold"
-              style={{
-                background: "rgba(21, 14, 38, 0.95)",
-                border: "2px solid rgba(15, 8, 25, 0.9)",
-                color: "#9a8fb0",
-              }}
-            >
-              +{extraCount}
-            </div>
-          )}
-        </div>
-
-        <button
-          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-          style={{ color: "#6a5f7c" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#e3c8ff";
-            e.currentTarget.style.background = "rgba(185, 139, 255, 0.1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "#6a5f7c";
-            e.currentTarget.style.background = "transparent";
-          }}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-            <circle cx="12" cy="5" r="1.5" />
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="12" cy="19" r="1.5" />
-          </svg>
-        </button>
-      </div>
+      {/* Menu */}
+      <button
+        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0"
+        style={{ color: "#6a5f7c" }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = "#e3c8ff";
+          e.currentTarget.style.background = "rgba(185, 139, 255, 0.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = "#6a5f7c";
+          e.currentTarget.style.background = "transparent";
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+          <circle cx="12" cy="5" r="1.5" />
+          <circle cx="12" cy="12" r="1.5" />
+          <circle cx="12" cy="19" r="1.5" />
+        </svg>
+      </button>
     </motion.div>
   );
 }

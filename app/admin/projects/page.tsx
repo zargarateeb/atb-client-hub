@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import EditProjectModal from "@/components/EditProjectModal";
 
 interface Project {
   _id: string;
   title: string;
+  description?: string;
   status: "pending" | "in-progress" | "review" | "delivered" | "cancelled";
   price?: number;
   deliveryDate?: string;
+  thumbnailUrl?: string;
   clientId: { _id: string; name: string; email: string; role?: string };
 }
 
@@ -22,17 +25,25 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   cancelled: { bg: "rgba(255, 155, 176, 0.15)", color: "#ff9bb0" },
 };
 
+function getInitials(title: string): string {
+  const words = title.replace(/[^\w\s]/g, "").split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "AT";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const fetchProjects = async () => {
     const res = await fetch("/api/projects", { cache: "no-store" });
     const data = await res.json();
     if (data.success) {
-      // Filter out admin-owned projects (show only client projects)
       const clientProjects = (data.projects as Project[]).filter(
         (p) => p.clientId?.role !== "admin"
       );
@@ -89,6 +100,11 @@ export default function AdminProjectsPage() {
     }
   };
 
+  const handleEdit = (project: Project) => {
+    setEditingProject(project);
+    setEditModalOpen(true);
+  };
+
   return (
     <div className="p-5 md:p-8 max-w-6xl mx-auto">
       <div className="mb-6">
@@ -97,7 +113,7 @@ export default function AdminProjectsPage() {
         </p>
         <h1 className="text-editorial text-white text-2xl">All Projects</h1>
         <p className="text-sm mt-1" style={{ color: "#9a8fb0" }}>
-          Update status and manage all client work.
+          Update status, thumbnails, and manage all client work.
         </p>
       </div>
 
@@ -125,6 +141,7 @@ export default function AdminProjectsPage() {
             };
             const statusStyle =
               STATUS_COLORS[p.status] || STATUS_COLORS.pending;
+            const initials = getInitials(p.title);
 
             return (
               <motion.div
@@ -134,46 +151,71 @@ export default function AdminProjectsPage() {
                 transition={{ delay: i * 0.03 }}
                 className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-2xl glass"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <span
-                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{
-                        background: statusStyle.color,
-                        boxShadow: `0 0 8px ${statusStyle.color}`,
-                      }}
-                    />
-                    <p className="text-sm font-bold text-white truncate">
-                      {p.title}
-                    </p>
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {/* Thumbnail preview */}
+                  <div
+                    className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+                      color: "#ffffff",
+                    }}
+                  >
+                    {p.thumbnailUrl ? (
+                      <img
+                        src={p.thumbnailUrl}
+                        alt={p.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      initials
+                    )}
                   </div>
-                  <p className="text-[11px]" style={{ color: "#9a8fb0" }}>
-                    {client?.name || "Unknown"} · {client?.email || ""}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    {p.deliveryDate && (
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 mb-1">
                       <span
-                        className="tc text-[10px]"
-                        style={{ color: "#6a5f7c" }}
-                      >
-                        📅 {new Date(p.deliveryDate).toLocaleDateString()}
-                      </span>
-                    )}
-                    {p.price && (
-                      <span
-                        className="tc text-[10px]"
-                        style={{ color: "#86efac" }}
-                      >
-                        ₹{p.price}
-                      </span>
-                    )}
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{
+                          background: statusStyle.color,
+                          boxShadow: `0 0 8px ${statusStyle.color}`,
+                        }}
+                      />
+                      <p className="text-sm font-bold text-white truncate">
+                        {p.title}
+                      </p>
+                    </div>
+                    <p className="text-[11px]" style={{ color: "#9a8fb0" }}>
+                      {client?.name || "Unknown"} · {client?.email || ""}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      {p.deliveryDate && (
+                        <span
+                          className="tc text-[10px]"
+                          style={{ color: "#6a5f7c" }}
+                        >
+                          📅 {new Date(p.deliveryDate).toLocaleDateString()}
+                        </span>
+                      )}
+                      {p.price && (
+                        <span
+                          className="tc text-[10px]"
+                          style={{ color: "#86efac" }}
+                        >
+                          ₹{p.price}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Right side: status + delete */}
+                {/* Right side: status + edit + delete */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span
-                    className="tc text-[10px] px-2 py-1 rounded-full uppercase font-bold"
+                    className="tc text-[10px] px-2 py-1 rounded-full uppercase font-bold hidden md:inline-block"
                     style={{
                       background: statusStyle.bg,
                       color: statusStyle.color,
@@ -198,6 +240,30 @@ export default function AdminProjectsPage() {
                       </option>
                     ))}
                   </select>
+
+                  {/* Edit button */}
+                  <button
+                    onClick={() => handleEdit(p)}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+                    style={{
+                      background: "rgba(185, 139, 255, 0.08)",
+                      color: "#e3c8ff",
+                      border: "1px solid rgba(185, 139, 255, 0.25)",
+                    }}
+                    aria-label="Edit project"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      className="w-4 h-4"
+                    >
+                      <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                  </button>
+
+                  {/* Delete button */}
                   <button
                     onClick={() => handleDelete(p._id, p.title)}
                     disabled={deletingId === p._id}
@@ -230,6 +296,13 @@ export default function AdminProjectsPage() {
           })}
         </div>
       )}
+
+      <EditProjectModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSaved={fetchProjects}
+        project={editingProject}
+      />
     </div>
   );
 }

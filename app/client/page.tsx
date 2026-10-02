@@ -15,6 +15,7 @@ interface Project {
   status: "pending" | "in-progress" | "review" | "delivered" | "cancelled";
   price?: number;
   deliveryDate?: string;
+  thumbnailUrl?: string;
   createdAt: string;
 }
 
@@ -263,20 +264,18 @@ export default function ClientHomePage() {
           )}
 
           <div className="flex flex-col gap-3">
-            {!loading &&
-              !error &&
-              activeProjects.slice(0, 5).map((project, i) => (
-                <ProjectCard
-                  key={project._id}
-                  title={project.title}
-                  thumbnail={PROJECT_IMAGES[i % PROJECT_IMAGES.length]}
-                  progress={getProgress(project.status)}
-                  status={STATUS_MAP[project.status]}
-                  deadline={formatDeadline(project.deliveryDate)}
-                  avatars={AVATARS}
-                  extraCount={i % 2 === 0 ? 2 : undefined}
-                />
-              ))}
+          {!loading &&
+            !error &&
+            activeProjects.slice(0, 5).map((project) => (
+              <ProjectCard
+                key={project._id}
+                title={project.title}
+                thumbnail={project.thumbnailUrl}
+                progress={getProgress(project.status)}
+                status={STATUS_MAP[project.status]}
+                deadline={formatDeadline(project.deliveryDate)}
+              />
+            ))}
           </div>
         </div>
 

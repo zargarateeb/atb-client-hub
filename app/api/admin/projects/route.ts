@@ -28,7 +28,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { clientEmail, clientName, title, description, status, price, deliveryDate } = body;
+    const {
+      clientEmail,
+      clientName,
+      title,
+      description,
+      status,
+      price,
+      deliveryDate,
+      thumbnailUrl,
+    } = body;
 
     if (!clientEmail || !title) {
       return NextResponse.json(
@@ -37,7 +46,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find or create client
     let client = await User.findOne({ email: clientEmail.toLowerCase() });
     if (!client) {
       client = await User.create({
@@ -55,6 +63,7 @@ export async function POST(req: NextRequest) {
       status: status || "pending",
       price: price ? Number(price) : undefined,
       deliveryDate: deliveryDate ? new Date(deliveryDate) : undefined,
+      thumbnailUrl: thumbnailUrl || undefined,
     });
 
     return NextResponse.json({ success: true, project, client }, { status: 201 });

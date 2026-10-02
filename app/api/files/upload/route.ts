@@ -74,6 +74,23 @@ export async function POST(req: NextRequest) {
       publicId: result.public_id,
     });
 
+    // Log activity
+    try {
+      const Activity = (await import("@/lib/models/Activity")).default;
+      await Activity.create({
+        projectId,
+        userId: user._id,
+        userRole: user.role,
+        type: "file-uploaded",
+        text:
+          user.role === "admin"
+            ? `Ateeb uploaded "${file.name}"`
+            : `You uploaded "${file.name}"`,
+      });
+    } catch (e) {
+      console.error("Failed to log activity:", e);
+    }
+
     return NextResponse.json({ success: true, file: asset }, { status: 201 });
   } catch (error) {
     return NextResponse.json(

@@ -35,13 +35,52 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const body = await req.json();
 
-    const project = await Project.findByIdAndUpdate(id, body, { new: true });
-
-    if (!project) {
+    const oldProject = await Project.findById(id);
+    if (!oldProject) {
       return NextResponse.json(
         { success: false, error: "Project not found" },
         { status: 404 }
       );
+    }
+
+    // Build update object — only include defined fields
+    const updateData: Record<string, unknown> = {};
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.description !== undefined)
+      updateData.description = body.description;
+    if (body.status !== undefined) updateData.status = body.status;
+    if (body.price !== undefined) updateData.price = body.price;
+    if (body.deliveryDate !== undefined)
+      updateData.deliveryDate = body.deliveryDate;
+    if (body.thumbnailUrl !== undefined)
+      updateData.thumbnailUrl = body.thumbnailUrl;
+
+    const project = await Project.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
+    // TypeScript-safe null check
+    if (!project) {
+      return NextResponse.json(
+        { success: false, error: "Failed to update project" },
+        { status: 500 }
+      );
+    }
+
+    // Log status change
+    if (body.status && body.status !== oldProject.status) {
+      try {
+        const Activity = (await import("@/lib/models/Activity")).default;
+        await Activity.create({
+          projectId: project._id,
+          userId: admin._id,
+          userRole: "admin",
+          type: "status-changed",
+          text: `"${project.title}" moved to ${body.status}`,
+        });
+      } catch (e) {
+        console.error("Failed to log activity:", e);
+      }
     }
 
     return NextResponse.json({ success: true, project });
@@ -79,7 +118,6 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
 
     const { id } = await context.params;
 
-    // Delete associated messages + files
     await Promise.all([
       Message.deleteMany({ projectId: id }),
       FileAsset.deleteMany({ projectId: id }),

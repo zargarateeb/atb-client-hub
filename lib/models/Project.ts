@@ -14,6 +14,7 @@ export interface IProject extends Document {
   status: ProjectStatus;
   price?: number;
   deliveryDate?: Date;
+  thumbnailUrl?: string;
   createdAt: Date;
 }
 
@@ -33,6 +34,7 @@ const ProjectSchema = new Schema<IProject>(
     },
     price: { type: Number },
     deliveryDate: { type: Date },
+    thumbnailUrl: { type: String },
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
