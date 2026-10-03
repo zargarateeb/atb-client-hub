@@ -25,11 +25,15 @@ export const metadata: Metadata = {
   title: "ATB Client Hub",
   description: "Private workspace for ATB Visuals clients",
   manifest: "/manifest.json",
-  themeColor: "#b98bff",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "ATB Hub",
+  },
+  icons: {
+    icon: "https://ik.imagekit.io/rgbcpayfx/launchericon-192x192.png",
+    shortcut: "https://ik.imagekit.io/rgbcpayfx/launchericon-192x192.png",
+    apple: "https://ik.imagekit.io/rgbcpayfx/launchericon-192x192.png",
   },
 };
 
