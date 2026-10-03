@@ -7,6 +7,7 @@ import ProjectCard from "@/components/ProjectCard";
 import PromoCard from "@/components/PromoCard";
 import ActivityFeed from "@/components/ActivityFeed";
 import MessagesPreview from "@/components/MessagesPreview";
+import PushPermissionBanner from "@/components/PushPermissionBanner";
 
 interface Project {
   _id: string;
@@ -164,6 +165,8 @@ export default function ClientHomePage() {
 
   return (
     <div className="p-5 md:p-8 max-w-7xl mx-auto">
+      {/* Push notifications banner */}
+      <PushPermissionBanner />
       {/* Greeting */}
       <div className="flex items-start justify-between mb-6 md:mb-8 flex-wrap gap-4">
         <div>

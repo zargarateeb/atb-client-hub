@@ -107,6 +107,38 @@ export async function POST(req: NextRequest) {
 
     const populated = await message.populate("senderId", "name email role");
 
+    // Send push notification to the other party
+try {
+  const { sendPushToUser, sendPushToAdmins } = await import(
+    "@/lib/webPush"
+  );
+  const Project = (await import("@/lib/models/Project")).default;
+
+  const project = await Project.findById(projectId).select("clientId title");
+
+  if (project) {
+    if (user.role === "client") {
+      // Client sent → notify admins
+      await sendPushToAdmins({
+        title: "New message",
+        body: `${user.name}: ${text.slice(0, 60)}${text.length > 60 ? "..." : ""}`,
+        url: "/admin/messages",
+        tag: `msg-${projectId}`,
+      });
+    } else {
+      // Admin sent → notify client
+      await sendPushToUser(project.clientId, {
+        title: "Ateeb replied",
+        body: text.slice(0, 80) + (text.length > 80 ? "..." : ""),
+        url: "/client/messages",
+        tag: `msg-${projectId}`,
+      });
+    }
+  }
+} catch (e) {
+  console.error("Push notification failed:", e);
+}
+
     return NextResponse.json(
       { success: true, message: populated },
       { status: 201 }

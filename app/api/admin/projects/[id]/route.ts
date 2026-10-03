@@ -67,21 +67,47 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       );
     }
 
-    // Log status change
-    if (body.status && body.status !== oldProject.status) {
-      try {
-        const Activity = (await import("@/lib/models/Activity")).default;
-        await Activity.create({
-          projectId: project._id,
-          userId: admin._id,
-          userRole: "admin",
-          type: "status-changed",
-          text: `"${project.title}" moved to ${body.status}`,
-        });
-      } catch (e) {
-        console.error("Failed to log activity:", e);
-      }
-    }
+    // Log status change + notify client
+if (body.status && body.status !== oldProject.status) {
+  try {
+    const Activity = (await import("@/lib/models/Activity")).default;
+    await Activity.create({
+      projectId: project._id,
+      userId: admin._id,
+      userRole: "admin",
+      type: "status-changed",
+      text: `"${project.title}" moved to ${body.status}`,
+    });
+  } catch (e) {
+    console.error("Failed to log activity:", e);
+  }
+
+  // Notify client about status change
+  try {
+    const { sendPushToUser } = await import("@/lib/webPush");
+    const statusLabels: Record<string, string> = {
+      pending: "Pending",
+      "in-progress": "In Progress",
+      review: "Ready for Review",
+      delivered: "Delivered 🎉",
+      cancelled: "Cancelled",
+    };
+
+    // Special message for "delivered" — Video Ready
+    const isDelivered = body.status === "delivered";
+
+    await sendPushToUser(project.clientId, {
+      title: isDelivered ? "Your video is ready! 🎬" : "Project update",
+      body: isDelivered
+        ? `"${project.title}" has been delivered. Tap to view.`
+        : `"${project.title}" is now ${statusLabels[body.status] || body.status}`,
+      url: "/client",
+      tag: `status-${project._id}`,
+    });
+  } catch (e) {
+    console.error("Push notification failed:", e);
+  }
+}
 
     return NextResponse.json({ success: true, project });
   } catch (error) {

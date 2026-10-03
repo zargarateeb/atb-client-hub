@@ -73,6 +73,20 @@ export async function POST(req: NextRequest) {
       fileSize: file.size,
       publicId: result.public_id,
     });
+    // Notify admins when a client uploads a file
+if (user.role === "client") {
+  try {
+    const { sendPushToAdmins } = await import("@/lib/webPush");
+    await sendPushToAdmins({
+      title: "New file uploaded",
+      body: `${user.name} uploaded "${file.name}"`,
+      url: "/admin/files",
+      tag: `file-${asset._id}`,
+    });
+  } catch (e) {
+    console.error("Push notification failed:", e);
+  }
+}
 
     // Log activity
     try {

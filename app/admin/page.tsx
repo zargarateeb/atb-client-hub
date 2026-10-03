@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import ProjectModal from "@/components/ProjectModal";
 import StatCard from "@/components/StatCard";
+import PushPermissionBanner from "@/components/PushPermissionBanner";
 
 interface Client {
   _id: string;
@@ -106,6 +107,8 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="p-5 md:p-8 max-w-6xl mx-auto">
+      {/* Push notifications banner */}
+      <PushPermissionBanner />
       {/* Header */}
       <div className="mb-6">
         <p className="label-caps mb-1" style={{ color: "#6a5f7c" }}>
