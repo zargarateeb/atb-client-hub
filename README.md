@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ATB Client Hub
 
-## Getting Started
+A full-stack client management portal built for ATB Visuals to manage
+projects, communication, files and deliveries in one place.
 
-First, run the development server:
+## 🚀 Live Demo
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+https://atb-client-hub.vercel.app
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 🔐 Client & admin authentication
+- 📊 Project management dashboard
+- 💬 Project-based messaging
+- 📁 File uploads and downloads
+- 🔔 Web push notifications
+- 📱 PWA support
+- 👨‍💻 Admin dashboard
+- 📈 Activity tracking
+- 📱 Responsive mobile-first UI
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tech Stack
 
-## Learn More
+- Next.js 16
+- TypeScript
+- React
+- Tailwind CSS
+- MongoDB + Mongoose
+- NextAuth.js
+- Cloudinary
+- Web Push
+- Framer Motion
+- Vercel
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗️ Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application uses Next.js App Router with API routes,
+MongoDB for persistent data, NextAuth for authentication,
+Cloudinary for file storage and Web Push for notifications.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application has separate client and admin interfaces
+with role-based access control.
 
-## Deploy on Vercel
+## 🔄 Project Workflow
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Client → Project → Files → Messages → Review → Delivery
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔐 Security
+
+- JWT-based authentication
+- Role-based access control
+- Protected API routes
+- Environment-based secrets
+- Server-side Cloudinary credentials
+- Protected admin routes
+
+## 📱 Current Status
+
+**Active project**
+
+Currently being improved with additional features
+and a React Native mobile application.
+
+## 📚 What I Learned
+
+- Building full-stack applications with Next.js
+- Designing MongoDB data models
+- Authentication and authorization
+- API design
+- File management
+- Push notifications
+- PWA architecture
+- Production deployment
+
+## 🔗 Links
+
+- Live App: https://atb-client-hub.vercel.app
+- Portfolio: https://atb-visuals.vercel.app
